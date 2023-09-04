@@ -3,7 +3,7 @@
 RED=16711680
 
 # ADD YOUR DISCORD WEBHOOK URL TO THE NEXT LINE
-URL='https://discord.com/api/webhooks/1132488373265760266/48oDcTn0Mup1jnZTpOctN0L--qqLOgfEA1_dlIikgvQyi1r5-mS-Jc9_-uF6MqJecvC0'
+URL=''
 
 # Lets put in some funny death messages
 # Credit where credit is due, I took inspiration from https://www.reddit.com/r/projectzomboid/comments/u3pivr/need_helpsuggestionswitty_comments/
