@@ -1,7 +1,7 @@
 #! /bin/bash
 
 
-URL='https://discord.com/api/webhooks/1132488373265760266/48oDcTn0Mup1jnZTpOctN0L--qqLOgfEA1_dlIikgvQyi1r5-mS-Jc9_-uF6MqJecvC0'
+URL=''
 
 RED=16711680
 
