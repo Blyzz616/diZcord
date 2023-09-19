@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 
 URL='https://discord.com/api/webhooks/'
 RED=16711680
@@ -26,6 +26,28 @@ TIMECALC () {
 
 # This process warns players that the server will be going down in X minutes specified in the restart command
 SHUTDOWNWARNING(){
+  case "$1" in
+    1)
+    /opt/pzserver2/dizcord/onemin.sh &
+    ;;
+
+    2)
+    /opt/pzserver2/dizcord/twomin.sh &
+    ;;
+
+    3)
+    /opt/pzserver2/dizcord/threemin.sh &
+    ;;
+
+    4)
+    /opt/pzserver2/dizcord/fourmin.sh &
+    ;;
+
+    5)
+    /opt/pzserver2/dizcord/fivemin.sh &
+    ;;
+
+  esac
   NOTICE="**Rotting Domain** server going down in ***$1 $MINUTE*** for maintenance."
   curl -H "Content-Type: application/json" -X POST -d "{\"embeds\": [{ \"color\": \"$ORANGE\", \"description\": \"$NOTICE\" }] }" "$URL"
 }
@@ -54,6 +76,7 @@ SHUTDOWN(){
     then
       screen -S PZ2 -p 0 -X stuff "^C exit ^M"
       /usr/local/bin/pzuser2/start.sh &
+      exit
     fi
   done
 }
@@ -65,15 +88,15 @@ PLAYERCHECK(){
   tail -Fn0 /home/pzuser2/Zomboid/server-console.txt 2> /dev/null | \
   while read -r line;
   do
-    EMPTY=$(echo "$line" | grep -o -E "Players connected ([0-9]" | awk -F"(" '{print $NF}')
+    EMPTY=$(echo "$line" | grep -o -E "Players connected \([0-9]" | awk -F"(" '{print $NF}')
     if [[ -n $EMPTY ]];
     then
       if [[ "$EMPTY" -eq 0 ]];
       then
-      	echo "No-one on server, Shutting down now to expedite matters"
+        echo "No-one on server, Shutting down now to expedite matters"
         SHUTDOWNNOW
       else # there is someone on the server
-      	break # so break the loop (effectively do nothing and continue)
+        break # so break the loop (effectively do nothing and continue)
       fi
     fi
   done
@@ -88,9 +111,10 @@ SHUTDOWNNOW(){
 
 if [[ -z "$1" ]];
 then
-	PLAYERCHECK
+  RESTARTTIMER="5"
+  PLAYERCHECK
   MINUTE="MINUTES"
-  SHUTDOWNWARNING "$@"
+  SHUTDOWNWARNING "$RESTARTTIMER"
   sleep 300
   SHUTDOWN
 else
