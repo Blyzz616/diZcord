@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 
 URL='https://discord.com/api/webhooks/'
 RED=16711680
