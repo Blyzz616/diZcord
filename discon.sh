@@ -1,43 +1,42 @@
 #! /bin/bash
 
-######################################
-#
-#   TO DO:
-#
-#   Handle server shutdown
-#
-######################################
-
-URL=''
+URL='https://discord.com/api/webhooks/'
 
 RED=16711680
+LAVENDER=15132410
 
 READER(){
 
   tail -Fn0 /home/pzuser2/Zomboid/server-console.txt 2> /dev/null | \
   while read -r line ; do
 
-    ###########################################################################
-    ######  Disconnections
-    ###########################################################################
-
     DISCONN=$(echo "$line" | grep -E '\[disconnect\]')
 
     if [[ -n $DISCONN ]];
     then
-            DISCONNSTEAM=$(echo "$DISCONN" | grep -E -o 'steam-id=[0-9]*' | awk -F= '{print $2}')
-            DISCONNPLAYER=$(echo "$DISCONN" | grep -E -o 'username=.*' | awk -F'"' '{print $2}')
+      echo "DISCONN=$DISCONN"
+      DISCONNSTEAM=$(echo "$DISCONN" | grep -E -o 'steam-id=[0-9]*' | awk -F= '{print $2}')
+      echo "DISCONNSTEAM-$DISCONNSTEAM"
+      DISCONNPLAYER=$(echo "$DISCONN" | grep -E -o 'username=.*' | awk -F'"' '{print $2}')
+      echo "DISCONNPLAYER=$DISCONNPLAYER"
+      if [[ -e /opt/pzserver2/dizcord/playerdb/$DISCONNSTEAM.online ]];
+      then
+       echo "/opt/pzserver2/dizcord/playerdb/$DISCONNSTEAM.online exists"
+       GAMESTART=$(cat /opt/pzserver2/dizcord/playerdb/"$DISCONNSTEAM".online)
+       GAMEEND=$(date +%s)
+       GAMETIME=$(( GAMEEND - GAMESTART ))
+       echo $GAMETIME >> /opt/pzserver2/dizcord/playerdb/"$DISCONNSTEAM".total
+       rm /opt/pzserver2/dizcord/playerdb/"$DISCONNSTEAM".online
+      fi
 
-            if [[ -e /opt/pzserver2/dizcord/playerdb/$DISCONNSTEAM.online ]];
-            then
-                GAMESTART=$(cat /opt/pzserver2/dizcord/playerdb/"$DISCONNSTEAM".online)
-              GAMEEND=$(date +%s)
-              GAMETIME=$(( GAMEEND - GAMESTART ))
-              echo $GAMETIME >> /opt/pzserver2/dizcord/playerdb/"$DISCONNSTEAM".total
-              rm /opt/pzserver2/dizcord/playerdb/"$DISCONNSTEAM".online
-            fi
+      # Session Time
+      if [[ $GAMETIME -eq 0 ]];
+      then
+        curl -H "Content-Type: application/json" -X POST -d "{\"embeds\": [{ \"color\": \"$LAVENDER\", \"title\": \"$The mods on the server appear to be out of date.:\", \"description\": \"Restarting the server to update all mods.\nPlease wait a minute before rejoining.\" }] }" $URL
+        /usr/local/bin/pzuser2/restart.sh &
+        exit
+      fi
 
-            # Session Time
       if [[ $GAMETIME -ge 86400 ]];
       then
         UPTIME=$(printf '%dd %dh %dm %ds' $((GAMETIME/86400)) $((GAMETIME%86400/3600)) $((GAMETIME%3600/60)) $((GAMETIME%60)))
@@ -52,7 +51,7 @@ READER(){
       fi
 
       # Total Time
-            TOTAL=$(awk '{ sum += $1 } END { print sum }' /opt/pzserver2/dizcord/playerdb/"$DISCONNSTEAM".total)
+      TOTAL=$(awk '{ sum += $1 } END { print sum }' /opt/pzserver2/dizcord/playerdb/"$DISCONNSTEAM".total)
 
       if [[ $TOTAL -ge 86400 ]];
       then
@@ -66,17 +65,18 @@ READER(){
       else
         LIFE=$(printf '%ds' $((GAMETIME)))
       fi
-     #\"fields\": [{ \"name\": \"Hours on Record:\", \"value\": \"$HRS\" }], \"thumbnail\": { \"url\": \"$IMGNAME\"} }] }" $URL
+
+     HOURTIME=$(awk '{ sum += $1 } END { print sum }' /opt/pzserver2/dizcord/playerdb/"$DISCONNSTEAM".total)
+     if [[ $TOTAL -ge 3600  ]];
+      then
+        HOURS=$(printf '%d Hours' $((TOTAL/3600)))
+     fi
+
       # do a lookup to get image name
       IMGNAME=$(grep -E "$DISCONNSTEAM" "/opt/pzserver2/dizcord/playerdb/users.log" | awk '{print $NF}')
-      #curl -H "Content-Type: application/json" -X POST -d "{\"embeds\": [{ \"color\": \"$RED\", \"title\": \"$DISCONNPLAYER has disconnected\", \"description\": \"$DISCONNPLAYER was online for $UPTIME\\nTotal time on this server: $LIFE\", \"thumbnail\": { \"url\": \"$IMGNAME\"} } }] }" $URL
-      curl -H "Content-Type: application/json" -X POST -d "{\"embeds\": [{ \"color\": \"$RED\", \"title\": \"$DISCONNPLAYER has disconnected:\", \"description\": \"$DISCONNPLAYER was online for $UPTIME\nTotal time on server: $LIFE\", \"thumbnail\": { \"url\": \"$IMGNAME\"} }] }" $URL
+      curl -H "Content-Type: application/json" -X POST -d "{\"embeds\": [{ \"color\": \"$RED\", \"title\": \"$DISCONNPLAYER has disconnected:\", \"description\": \"$DISCONNPLAYER was online for $UPTIME\nTotal time on server: \n $LIFE \n ($HOURS)\", \"thumbnail\": { \"url\": \"$IMGNAME\"} }] }" $URL
     fi
-
-    ###### End of Disconnections
-
   done
-
 }
 
 READER
