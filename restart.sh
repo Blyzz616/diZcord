@@ -1,6 +1,6 @@
 #!/bin/bash
 
-URL='https://discord.com/api/webhooks/1132488373265760266/48oDcTn0Mup1jnZTpOctN0L--qqLOgfEA1_dlIikgvQyi1r5-mS-Jc9_-uF6MqJecvC0'
+URL='https://discord.com/api/webhooks/'
 RED=16711680
 ORANGE=16753920
 
@@ -65,7 +65,7 @@ PLAYERCHECK(){
   tail -Fn0 /home/pzuser2/Zomboid/server-console.txt 2> /dev/null | \
   while read -r line;
   do
-    EMPTY=$(echo "$line" | grep -E "Players connected ([0-9]" | awk -F"(" '{print $NF}')
+    EMPTY=$(echo "$line" | grep -o -E "Players connected ([0-9]" | awk -F"(" '{print $NF}')
     if [[ -n $EMPTY ]];
     then
       if [[ "$EMPTY" -eq 0 ]];
