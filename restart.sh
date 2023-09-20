@@ -47,7 +47,9 @@ SHUTDOWNWARNING(){
     /opt/pzserver2/dizcord/fivemin.sh &
     ;;
 
+    *)
   esac
+  
   NOTICE="**Rotting Domain** server going down in ***$1 $MINUTE*** for maintenance."
   curl -H "Content-Type: application/json" -X POST -d "{\"embeds\": [{ \"color\": \"$ORANGE\", \"description\": \"$NOTICE\" }] }" "$URL"
 }
