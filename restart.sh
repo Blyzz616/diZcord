@@ -1,12 +1,16 @@
-#!/bin/bash
+#!/bin/bash -x
 
 URL='https://discord.com/api/webhooks/'
 RED=16711680
 ORANGE=16753920
 
+# this file to limit the server-down notificaiton to 1
+touch /tmp/dwn.cmd
+echo "0" >/tmp/dwn.cmd
+
 TIMECALC () {
   #get timestamp from srvr-up.time
-  TIMEUP=$(cat /tmp/srvr2-up.time)
+  TIMEUP=$(</tmp/srvr2-up.time)
   #calculate up-time
   TIMEDOWN=$(date +%s)
   UPSECS=$(( TIMEDOWN - TIMEUP ))
@@ -48,14 +52,16 @@ SHUTDOWNWARNING(){
     ;;
 
     *)
+    ;;
+
   esac
-  
   NOTICE="**Rotting Domain** server going down in ***$1 $MINUTE*** for maintenance."
   curl -H "Content-Type: application/json" -X POST -d "{\"embeds\": [{ \"color\": \"$ORANGE\", \"description\": \"$NOTICE\" }] }" "$URL"
 }
 
 # This funciton will initiate a shutdown process that posts the uptime to discord
 SHUTDOWN(){
+  TIMECALC
   MESSAGE="The Server was up for $UPTIME"
   DOWN="**Rotting Domain** server going down now."
   curl -H "Content-Type: application/json" -X POST -d "{\"embeds\": [{ \"color\": \"$RED\", \"title\": \"$DOWN\", \"description\": \"$MESSAGE\" }] }" $URL
@@ -73,17 +79,21 @@ SHUTDOWN(){
   tail -Fn0 /home/pzuser2/Zomboid/server-console.txt 2> /dev/null | \
   while read -r line;
   do
-    DOWNSVR=$(echo "$line" | grep -E "SSteamSDK: LogOff")
+    DOWNSVR=$(echo "$line" | grep -o -E "SSteamSDK: LogOff")
     if [[ -n $DOWNSVR ]];
     then
-      screen -S PZ2 -p 0 -X stuff "^C exit ^M"
-      /usr/local/bin/pzuser2/start.sh &
-      exit
+      if [[ $(</tmp/dwn.cmd) -eq 0 ]];
+      then
+        echo "1" > /tmp/dwn.cmd
+        screen -S PZ2 -p 0 -X stuff "^C exit ^M"
+        /usr/local/bin/pzuser2/start.sh &
+        exit
+      fi
     fi
   done
 }
 
-# This function will check for players, if there are none, it will immediately run the shutdownnow() funciton and kill the server
+# This function will check for players, if there are none, it will immediately run the shutdown() funciton and kill the server
 PLAYERCHECK(){
   screen -S PZ2 -p 0 -X stuff "players ^M"
 
@@ -91,42 +101,33 @@ PLAYERCHECK(){
   while read -r line;
   do
     EMPTY=$(echo "$line" | grep -o -E "Players connected \([0-9]" | awk -F"(" '{print $NF}')
-    if [[ -n $EMPTY ]];
+    if [[ "$EMPTY" -ge 1 ]];
     then
-      if [[ "$EMPTY" -eq 0 ]];
-      then
-        echo "No-one on server, Shutting down now to expedite matters"
-        SHUTDOWNNOW
-      else # there is someone on the server
-        break # so break the loop (effectively do nothing and continue)
-      fi
+      break # so break the loop (effectively do nothing and continue)
+    elif [[ "$EMPTY" -eq 0 ]];
+    then
+      echo "No-one on server, Shutting down now to expedite matters"
+      SHUTDOWN
     fi
   done
-}
-
-# This process will output the time the server was up and then call shutdown()
-SHUTDOWNNOW(){
-  TIMECALC
-  SHUTDOWN
-  exit
 }
 
 if [[ -z "$1" ]];
 then
   RESTARTTIMER="5"
-  PLAYERCHECK
   MINUTE="MINUTES"
+  PLAYERCHECK
   SHUTDOWNWARNING "$RESTARTTIMER"
   sleep 300
   SHUTDOWN
 else
   case "$1" in
     now)
-    SHUTDOWNNOW
+    SHUTDOWN
     ;;
 
     0)
-    SHUTDOWNNOW
+    SHUTDOWN
     ;;
 
     1)
