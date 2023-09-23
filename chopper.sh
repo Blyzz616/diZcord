@@ -1,7 +1,6 @@
 #! /bin/bash
 
 # ADD YOUR DISCORD WEBHOOK TO THE NEXT LINE
-URL='https://discord.com/api/webhooks/'
 
 # EHE handling
 EHE_TYPE="/opt/pzserver2/dizcord/ehe.type"
@@ -38,7 +37,7 @@ READER(){
     # Are we crashing?
     EHE_CRASH=$(echo "$line" | grep -E -o "$EHE_LAUNCH.*crashing:.*" | awk -F: '{print $NF}')
     EHE_CRASH_LOG=$(echo "$line" | grep -E -o "stopAllHeldEventSounds for HELI")
-    EHE_ROAMING=$(echo "$line" | grep -E "-roaming")
+    EHE_ROAMING=$(echo "$line" | grep -E "roaming")
     EHE_FLY_OVER=$(echo "$line" | grep -E "FLEW OVER TARGET \(.*" | awk -F"(" '{print $NF}' | rev | cut -c2- | rev)
     EHE_GO_HOME=$(echo "$line" | grep -E "UN-LAUNCH")
 
