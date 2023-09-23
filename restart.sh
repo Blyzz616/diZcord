@@ -79,14 +79,16 @@ SHUTDOWN(){
   tail -Fn0 /home/pzuser2/Zomboid/server-console.txt 2> /dev/null | \
   while read -r line;
   do
-    DOWNSVR=$(echo "$line" | grep -o -E "SSteamSDK: LogOff")
-    if [[ -n $DOWNSVR ]];
+    DOWNSVR=$(echo "$line" | grep -c -E "SSteamSDK: LogOff")
+    if [[ "$DOWNSVR" -eq 1 ]];
     then
       if [[ $(</tmp/dwn.cmd) -eq 0 ]];
       then
         echo "1" > /tmp/dwn.cmd
         screen -S PZ2 -p 0 -X stuff "^C exit ^M"
         /usr/local/bin/pzuser2/start.sh &
+        exit
+      else
         exit
       fi
     fi
