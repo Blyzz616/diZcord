@@ -6,7 +6,7 @@ ORANGE=16753920
 
 # this file to limit the server-down notificaiton to 1
 touch /tmp/dwn.cmd
-echo "0" >/tmp/dwn.cmd
+echo "0" > /tmp/dwn.cmd
 
 TIMECALC () {
   #get timestamp from srvr-up.time
@@ -32,31 +32,40 @@ TIMECALC () {
 SHUTDOWNWARNING(){
   case "$1" in
     1)
+    MINUTE="MINUTE"
     /opt/pzserver2/dizcord/onemin.sh &
     ;;
 
     2)
+    MINUTE="MINUTES"
     /opt/pzserver2/dizcord/twomin.sh &
     ;;
 
     3)
+    MINUTE="MINUTES"
     /opt/pzserver2/dizcord/threemin.sh &
     ;;
 
     4)
+    MINUTE="MINUTES"
     /opt/pzserver2/dizcord/fourmin.sh &
     ;;
 
     5)
+    MINUTE="MINUTES"
     /opt/pzserver2/dizcord/fivemin.sh &
     ;;
 
     *)
+    echo "Incorrect time variable passed to SHUTDOWNWARNING Function" > /tmp/dizcord.err
     ;;
-
   esac
+
   NOTICE="**Rotting Domain** server going down in ***$1 $MINUTE*** for maintenance."
   curl -H "Content-Type: application/json" -X POST -d "{\"embeds\": [{ \"color\": \"$ORANGE\", \"description\": \"$NOTICE\" }] }" "$URL"
+
+  sleep $((60*"$1"))
+  SHUTDOWN
 }
 
 # This funciton will initiate a shutdown process that posts the uptime to discord
@@ -66,13 +75,12 @@ SHUTDOWN(){
   DOWN="**Rotting Domain** server going down now."
   curl -H "Content-Type: application/json" -X POST -d "{\"embeds\": [{ \"color\": \"$RED\", \"title\": \"$DOWN\", \"description\": \"$MESSAGE\" }] }" $URL
 
-  screen -S PZ2-S-obit -p 0 -X stuff "^C exit ^M"
-  screen -S PZ2-S-discon -p 0 -X stuff "^C exit ^M"
-  screen -S PZ2-S-startup -p 0 -X stuff "^C exit ^M"
-  screen -S PZ2-S-connect -p 0 -X stuff "^C exit ^M"
-  screen -S PZ2-S-chopper -p 0 -X stuff "^C exit ^M"
-  screen -S PZ2-S-shutdown -p 0 -X stuff "^C exit ^M"
-  screen -S PZ2-S-stream -p 0 -X stuff "^C exit ^M"
+  screen -S PZ2-S-obit -X stuff "^C exit ^M"
+  screen -S PZ2-S-discon -X stuff "^C exit ^M"
+  screen -S PZ2-S-connect -X stuff "^C exit ^M"
+  screen -S PZ2-S-chopper -X stuff "^C exit ^M"
+  screen -S PZ2-S-shutdown -X stuff "^C exit ^M"
+  screen -S PZ2-S-stream -X stuff "^C exit ^M"
 
   screen -S PZ2 -p 0 -X stuff "quit ^M"
 
@@ -85,19 +93,18 @@ SHUTDOWN(){
       if [[ $(</tmp/dwn.cmd) -eq 0 ]];
       then
         echo "1" > /tmp/dwn.cmd
-        screen -S PZ2 -p 0 -X stuff "^C exit ^M"
+        screen -S PZ2 -X stuff "^C exit ^M"
         /usr/local/bin/pzuser2/start.sh &
-        exit
-      else
-        exit
+        break
       fi
     fi
   done
+  exit
 }
 
 # This function will check for players, if there are none, it will immediately run the shutdown() funciton and kill the server
 PLAYERCHECK(){
-  screen -S PZ2 -p 0 -X stuff "players ^M"
+  screen -S PZ2 -X stuff "players ^M"
 
   tail -Fn0 /home/pzuser2/Zomboid/server-console.txt 2> /dev/null | \
   while read -r line;
@@ -105,7 +112,8 @@ PLAYERCHECK(){
     EMPTY=$(echo "$line" | grep -o -E "Players connected \([0-9]" | awk -F"(" '{print $NF}')
     if [[ "$EMPTY" -ge 1 ]];
     then
-      break # so break the loop (effectively do nothing and continue)
+      SHUTDOWNWARNING "$RESTARTTIMER"
+      break
     elif [[ "$EMPTY" -eq 0 ]];
     then
       echo "No-one on server, Shutting down now to expedite matters"
@@ -117,12 +125,9 @@ PLAYERCHECK(){
 if [[ -z "$1" ]];
 then
   RESTARTTIMER="5"
-  MINUTE="MINUTES"
   PLAYERCHECK
-  SHUTDOWNWARNING "$RESTARTTIMER"
-  sleep 300
-  SHUTDOWN
 else
+  RESTARTTIMER="$1"
   case "$1" in
     now)
     SHUTDOWN
@@ -132,22 +137,13 @@ else
     SHUTDOWN
     ;;
 
-    1)
-    MINUTE="MINUTE"
-    ;;
-
-    [2-5])
-    MINUTE="MINUTES"
+    [1-5])
+    PLAYERCHECK
     ;;
 
     *)
     echo "Please pick a number between 0 and 5 and try again."
     exit
     ;;
-
   esac
 fi
-
-SHUTDOWNWARNING "$@"
-sleep $((60*"$1"))
-SHUTDOWN
