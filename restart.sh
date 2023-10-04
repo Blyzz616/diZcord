@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 
 URL='https://discord.com/api/webhooks/'
 RED=16711680
@@ -75,12 +75,42 @@ SHUTDOWN(){
   DOWN="**Rotting Domain** server going down now."
   curl -H "Content-Type: application/json" -X POST -d "{\"embeds\": [{ \"color\": \"$RED\", \"title\": \"$DOWN\", \"description\": \"$MESSAGE\" }] }" $URL
 
-  screen -S PZ2-S-obit -X stuff "^C exit ^M"
-  screen -S PZ2-S-discon -X stuff "^C exit ^M"
-  screen -S PZ2-S-connect -X stuff "^C exit ^M"
-  screen -S PZ2-S-chopper -X stuff "^C exit ^M"
-  screen -S PZ2-S-shutdown -X stuff "^C exit ^M"
-  screen -S PZ2-S-stream -X stuff "^C exit ^M"
+  screen -S PZ2-S-obit -X stuff "^C"
+  screen -S PZ2-S-discon -X stuff "^C"
+  screen -S PZ2-S-connect -X stuff "^C"
+  screen -S PZ2-S-chopper -X stuff "^C"
+  screen -S PZ2-S-shutdown -X stuff "^C"
+  screen -S PZ2-S-stream -X stuff "^C"
+  sleep 2
+  screen -S PZ2-S-obit -X stuff "exit ^M"
+  screen -S PZ2-S-discon -X stuff "exit ^M"
+  screen -S PZ2-S-connect -X stuff "exit ^M"
+  screen -S PZ2-S-chopper -X stuff "exit ^M"
+  screen -S PZ2-S-shutdown -X stuff "exit ^M"
+  screen -S PZ2-S-stream -X stuff "exit ^M"
+
+
+  if [[ "$EMPTY" -gt "0" ]];
+  then
+    CONNECTED=()
+    # Ok, let's kick these lazy buggers out
+    screen -S PZ2 -X stuff "players ^M"
+
+    tail -Fn0 /home/pzuser2/Zomboid/server-console.txt 2> /dev/null | \
+    while read -r line;
+    do
+      if [[ -z "$line" ]]
+      then
+        for element in "${CONNECTED[@]}"; do
+          screen -S PZ2 -X stuff "kickuser \"$element\" -r \"You were warned\" ^M"
+        done
+        break
+      else
+        PLAYER=$(echo "$line" | cut -c2-)
+        CONNECTED+=("$PLAYER")
+      fi
+    done
+  fi
 
   screen -S PZ2 -p 0 -X stuff "quit ^M"
 
@@ -116,7 +146,8 @@ PLAYERCHECK(){
       break
     elif [[ "$EMPTY" -eq 0 ]];
     then
-      echo "No-one on server, Shutting down now to expedite matters"
+      NOTICE="No-one on **Rotting Domain** right now, skipping warnings."
+      curl -H "Content-Type: application/json" -X POST -d "{\"embeds\": [{ \"color\": \"$ORANGE\", \"description\": \"$NOTICE\" }] }" "$URL"
       SHUTDOWN
     fi
   done
