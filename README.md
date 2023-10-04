@@ -31,10 +31,12 @@ _File list:_
 - connect.sh
   - Announces when a player joins a server and keeps a record of it in playerdb/users.log (one line per user)
     - Fields: First Seen | Steam ID | Steam Name | IP Address | Server Login | Local Image Name | Steam Image Link | Other profiles on server *
+    - **Animated GIFS are now supported!**
   - Keeps a record of failed join attempts in playerdb/denied.log
   - Keeps a record of when people joined the server in playerdb/access.log (one line per join)
 - discon.sh - Announces when a player leaves the server both when they quit or lose connection - Also Determines if there is workshop mod incompatibility and will restart the server if one exists.
-- chopper.sh - Announces the different states of the chopper event (with some fun random messages) Busy integrating Expanded Helicopter Events (EHE)
+  - **Animated GIFS are now supported!**
+- chopper.sh - Announces the different states of the chopper event (with some fun random messages). Busy integrating Expanded Helicopter Events (EHE)
 - obit.sh - read a different log file and puts in any deaths that happen on the server
 - shutdown.sh - Announces when the server is being taken down with a server-up timer
 
@@ -100,6 +102,7 @@ The join script is not working so nicely, it isn't displaying the user ping as i
 - [ ] Wizard: Ask if installer should advertise on Discord
 - [x] Add [send "quit" to screen] for graceful shutdown
 - [x] Add per-user time logging (session/day/all-time
+- [-] Add per-user time logging (session/day/all-time
 - [ ] Do the above and 'figger out' how to do it with per-server settings
 
 Notes:
