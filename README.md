@@ -95,6 +95,7 @@ Now join your Project Zomboid server and watch discord for all the glory.
 _Known bugs / To Do:_
 
 The join script is not working so nicely, it isn't displaying the user ping as it should be for some reason. I'll work on it at some point, but for right now, it is working well enough.
+- [ ] Possibly merge all monitoring files to run in one script?
 - [ ] re-write wizard to work with new file structure
 - [ ] fix connect.sh so that pings are displayed correctly
 - [ ] Wizard: add option to support multiple Zomboid servers
