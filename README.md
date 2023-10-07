@@ -106,6 +106,8 @@ The join script is not working so nicely, it isn't displaying the user ping as i
 - [x] Get Steam Icon working when it is a GIF
 - [ ] Get Expanded HElicopter Events working
 - [ ] Do the above and 'figger out' how to do it with per-server settings
+- [ ] clean code to use best practices
+- [ ] refactor to Python?
 
 Notes:
 If you get double quit notifications on player disconnect, it may be an anti-cheat problem.
