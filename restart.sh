@@ -82,12 +82,12 @@ SHUTDOWN(){
   screen -S PZ2-S-shutdown -X stuff "^C"
   screen -S PZ2-S-stream -X stuff "^C"
   sleep 2
-  screen -S PZ2-S-obit -X stuff "exit ^M"
-  screen -S PZ2-S-discon -X stuff "exit ^M"
-  screen -S PZ2-S-connect -X stuff "exit ^M"
-  screen -S PZ2-S-chopper -X stuff "exit ^M"
-  screen -S PZ2-S-shutdown -X stuff "exit ^M"
-  screen -S PZ2-S-stream -X stuff "exit ^M"
+  screen -S PZ2-S-obit -X stuff "exit ^M"; [[ -e /tmp/PZ2-S-obit.log ]] && rm /tmp/PZ2-S-obit.log
+  screen -S PZ2-S-discon -X stuff "exit ^M"; [[ -e /tmp/PZ2-S-discon.log ]] && rm /tmp/PZ2-S-discon.log
+  screen -S PZ2-S-connect -X stuff "exit ^M"; [[ -e /tmp/PZ2-S-connect.log ]] && rm /tmp/PZ2-S-connect.log
+  screen -S PZ2-S-chopper -X stuff "exit ^M"; [[ -e /tmp/PZ2-S-chopper.log ]] && rm /tmp/PZ2-S-chopper.log
+  screen -S PZ2-S-shutdown -X stuff "exit ^M"; [[ -e /tmp/PZ2-S-shutdown.log ]] && rm /tmp/PZ2-S-shutdown.log
+  screen -S PZ2-S-stream -X stuff "exit ^M"; [[ -e /tmp/PZ2-S-stream.log ]] && rm /tmp/PZ2-S-stream.log
 
 
   if [[ "$EMPTY" -gt "0" ]];
@@ -96,39 +96,44 @@ SHUTDOWN(){
     # Ok, let's kick these lazy buggers out
     screen -S PZ2 -X stuff "players ^M"
 
+    if [[ $(grep -c "command not found" /tmp/PZ2.log) -gt 0 ]];
+    then
+      screen -S PZ2 -X stuff "exit^M"; rm /tmp/PZ2.log
+    else
+      tail -Fn0 /home/pzuser2/Zomboid/server-console.txt 2> /dev/null | \
+      while read -r line;
+      do
+        if [[ -z "$line" ]]
+        then
+          for element in "${CONNECTED[@]}"; do
+            screen -S PZ2 -X stuff "kickuser \"$element\" -r \"You were warned\" ^M"
+          done
+          break
+        else
+          PLAYER=$(echo "$line" | cut -c2-)
+          CONNECTED+=("$PLAYER")
+        fi
+      done
+    fi
+  else
     tail -Fn0 /home/pzuser2/Zomboid/server-console.txt 2> /dev/null | \
     while read -r line;
     do
-      if [[ -z "$line" ]]
+      DOWNSVR=$(echo "$line" | grep -c -E "SSteamSDK: LogOff")
+      if [[ "$DOWNSVR" -eq 1 ]];
       then
-        for element in "${CONNECTED[@]}"; do
-          screen -S PZ2 -X stuff "kickuser \"$element\" -r \"You were warned\" ^M"
-        done
-        break
-      else
-        PLAYER=$(echo "$line" | cut -c2-)
-        CONNECTED+=("$PLAYER")
+        if [[ $(</tmp/dwn.cmd) -eq 0 ]];
+        then
+          echo "1" > /tmp/dwn.cmd
+          screen -S PZ2 -X stuff "^C"
+          sleep 2
+          screen -S PZ2 -X stuff "exit ^M"
+          /usr/local/bin/pzuser2/start.sh &
+          break
+        fi
       fi
     done
   fi
-
-  screen -S PZ2 -p 0 -X stuff "quit ^M"
-
-  tail -Fn0 /home/pzuser2/Zomboid/server-console.txt 2> /dev/null | \
-  while read -r line;
-  do
-    DOWNSVR=$(echo "$line" | grep -c -E "SSteamSDK: LogOff")
-    if [[ "$DOWNSVR" -eq 1 ]];
-    then
-      if [[ $(</tmp/dwn.cmd) -eq 0 ]];
-      then
-        echo "1" > /tmp/dwn.cmd
-        screen -S PZ2 -X stuff "^C exit ^M"
-        /usr/local/bin/pzuser2/start.sh &
-        break
-      fi
-    fi
-  done
   exit
 }
 
