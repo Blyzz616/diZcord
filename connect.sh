@@ -1,7 +1,7 @@
 #! /bin/bash
 
 # ADD YOUR DISCORD WEBHOOK TO THE NEXT LINE
-URL=''
+URL='https://discord.com/api/webhooks/'
 
 RED=16711680
 PURPLE=8388736
@@ -64,8 +64,45 @@ READER(){
       echo "$(date +%Y-%m-%d\ %H:%M:%S) - Steam user $STEAMNAME ($STEAMLINK) attempted connection" >> /opt/pzserver2/dizcord/playerdb/access.log
 
       # this worked before adding the last game shit
-#      curl -H "Content-Type: application/json" -X POST -d "{\"embeds\": [{ \"color\": \"$PURPLE\", \"title\": \"New connection:\", \"description\": \"Steam Link: [$STEAMNAME]($STEAMLINK)\nLogging in as $LOGINNAME\", \"fields\": [{ \"name\": \"Hours on Record:\", \"value\": \"$HRS\" }], \"thumbnail\": { \"url\": \"$IMGNAME\"} }] }" $URL
-      curl -H "Content-Type: application/json" -X POST -d "{\"embeds\": [{ \"color\": \"$PURPLE\",  \"title\": \"New connection:\",  \"description\": \"Steam Link: [$STEAMNAME]($STEAMLINK)\nLogging in as $LOGINNAME\",  \"fields\": [ { \"name\": \"Hours on Record:\", \"value\": \"$HRS\", \"inline\": false }, { \"name\": \"\u200b\", \"value\": \"\u200b\", \"inline\": false }, { \"name\": \"$STEAMNAME has also played:\", \"value\": \"\", \"inline\": false }, { \"name\": \"$OGAMENAME1\", \"value\": \"$OGAMEHRS1 \n $OGAMELAST1\", \"inline\": true   }, { \"name\": \"\u200b\", \"value\": \"\u200b\",     \"inline\": true }, { \"name\": \"$OGAMENAME2\", \"value\": \"$OGAMEHRS2 \n $OGAMELAST2\", \"inline\": true }],  \"thumbnail\": { \"url\": \"$IMGNAME\"} }] }" $URL
+#      curl -H "Content-Type: application/json" -X POST -d "{\"embeds\": [{ \"color\": \"$PURPLE\", \"title\": \"New connection:\", \"description\": \"Steam Link: [$STEAMNAME]($STEAMLINK)\nLogging in as **$LOGINNAME**\", \"fields\": [{ \"name\": \"Hours on Record:\", \"value\": \"$HRS\" }], \"thumbnail\": { \"url\": \"$IMGNAME\"} }] }" $URL
+
+      if [[ -z "$OGAMENAME2" ]];
+      then
+        if [[ -z "$OGAMENAME1" ]];
+        then
+          if [[ -z $HRS ]];
+          then
+            curl -H "Content-Type: application/json" -X POST -d \
+            "{\"embeds\": [{ \"color\": \"$PURPLE\", \"title\": \"New connection:\",  \"description\": \"Steam Profile: [$STEAMNAME]($STEAMLINK)\nLogging in as **$LOGINNAME**\", \
+            \"thumbnail\": { \"url\": \"$IMGNAME\"} }] }" $URL
+          else
+            curl -H "Content-Type: application/json" -X POST -d \
+            "{\"embeds\": [{ \"color\": \"$PURPLE\", \"title\": \"New connection:\",  \"description\": \"Steam Profile: [$STEAMNAME]($STEAMLINK)\nLogging in as **$LOGINNAME**\", \
+            \"fields\": [ { \"name\": \"Hours on Record:\", \"value\": \"$HRS\", \"inline\": false }, \
+            \"thumbnail\": { \"url\": \"$IMGNAME\"} }] }" $URL
+          fi
+        else
+        curl -H "Content-Type: application/json" -X POST -d \
+        "{\"embeds\": [{ \"color\": \"$PURPLE\", \"title\": \"New connection:\",  \"description\": \"Steam Profile: [$STEAMNAME]($STEAMLINK)\nLogging in as **$LOGINNAME**\", \
+        \"fields\": [ { \"name\": \"Hours on Record:\", \"value\": \"$HRS\", \"inline\": false }, \
+        { \"name\": \"\u200b\", \"value\": \"\u200b\", \"inline\": false }, \
+        { \"name\": \"$STEAMNAME has also played:\", \"value\": \"\", \"inline\": false }, \
+        { \"name\": \"$OGAMENAME1\", \"value\": \"$OGAMEHRS1 \n $OGAMELAST1\", \"inline\": true  }, \
+        \"thumbnail\": { \"url\": \"$IMGNAME\"} }] }" $URL
+        fi
+      else
+        curl -H "Content-Type: application/json" -X POST -d \
+        "{\"embeds\": [{ \"color\": \"$PURPLE\",  \"title\": \"New connection:\",  \"description\": \"Steam Profile: [$STEAMNAME]($STEAMLINK)\nLogging in as **$LOGINNAME**\",  \
+        \"fields\": [ { \"name\": \"Hours on Record:\", \"value\": \"$HRS\", \"inline\": false }, \
+        { \"name\": \"\u200b\", \"value\": \"\u200b\", \"inline\": false }, \
+        { \"name\": \"$STEAMNAME has also played:\", \"value\": \"\", \"inline\": false }, \
+        { \"name\": \"$OGAMENAME1\", \"value\": \"$OGAMEHRS1 \n $OGAMELAST1\", \"inline\": true  }, \
+        { \"name\": \"\u200b\", \"value\": \"\u200b\", \"inline\": true }, \
+        { \"name\": \"$OGAMENAME2\", \"value\": \"$OGAMEHRS2 \n $OGAMELAST2\", \"inline\": true }],  \
+        \"thumbnail\": { \"url\": \"$IMGNAME\"} }] }" $URL
+      fi
+
+#      curl -H "Content-Type: application/json" -X POST -d "{\"embeds\": [{ \"color\": \"$PURPLE\",  \"title\": \"New connection:\",  \"description\": \"Steam Profile: [$STEAMNAME]($STEAMLINK)\nLogging in as **$LOGINNAME**\",  \"fields\": [ { \"name\": \"Hours on Record:\", \"value\": \"$HRS\", \"inline\": false }, { \"name\": \"\u200b\", \"value\": \"\u200b\", \"inline\": false }, { \"name\": \"$STEAMNAME has also played:\", \"value\": \"\", \"inline\": false }, { \"name\": \"$OGAMENAME1\", \"value\": \"$OGAMEHRS1 \n $OGAMELAST1\", \"inline\": true }, { \"name\": \"\u200b\", \"value\": \"\u200b\",       \"inline\": true }, { \"name\": \"$OGAMENAME2\", \"value\": \"$OGAMEHRS2 \n $OGAMELAST2\", \"inline\": true }],  \"thumbnail\": { \"url\": \"$IMGNAME\"} }] }" $URL
 
       # check to see if we have a record of the user, if not, add to users.log and save image.
       if [[ $(grep -c -E "$CONNSTEAM" /opt/pzserver2/dizcord/playerdb/users.log) -eq 0 ]];
