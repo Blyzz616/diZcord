@@ -14,7 +14,6 @@ CHARTREUSE=8388352
 DISCORDBLUE=45015
 
 READER(){
-
   tail -Fn0 /home/pzuser2/Zomboid/server-console.txt 2> /dev/null | \
   while read -r line ; do
 
