@@ -84,7 +84,7 @@ READER(){
       "Why is it flying back and forth like that?" \
       "I think it might be looking for us!." \
       "I think that he is flying a search pattern" \
-      "If he keeps flying around like that he will bring down a horde on us!" \
+      "If he keeps flying around like that he'll bring down a horde on us!" \
     )
     MESS_SEARCH=${RAND_SEARCH[ $RANDOM % ${#RAND_SEARCH[@]} ]}
     curl -H "Content-Type: application/json" -X POST -d "{\"embeds\": [{ \"color\": \"$RED\", \"title\": \"$TITLE\", \"description\": \"$MESS_SEARCH\" }] }" $URL
@@ -94,9 +94,10 @@ READER(){
     then
       RAND_LEAVE=(\
         "Wait... Why is he leaving?" \
-        "Phew, He is leaving, I think we may be safe now." \
-        "Yeah, thats right, fly away and do not come back!" \
-        "I think we are truly alone now" \
+        "Phew, he is leaving, I think we may be safe now." \
+        "Yeah, thats right, fly away and don't come back!" \
+        "I think we're truly alone now." \
+        "I think were safe. For the time being." \
       )
       MESS_LEAVE=${RAND_LEAVE[ $RANDOM % ${#RAND_LEAVE[@]} ]}
       curl -H "Content-Type: application/json" -X POST -d "{\"embeds\": [{ \"color\": \"$CHARTREUSE\", \"title\": \"$TITLE\", \"description\": \"$MESS_LEAVE\" }] }" $URL
@@ -117,7 +118,7 @@ READER(){
         "Did you hear something?" \
         "What was that sound?" \
         "Do you hear something?" \
-        "Uhm, I think we might have a problem..." \
+        "Uhm, I think we may have a problem..." \
         "Shh shh shh shh, listen..." \
         "Wait, QUIEIT! I think I hear something" \
         )
@@ -131,8 +132,8 @@ READER(){
       then
         RAND_EHE=(\
           "Uhm **$EHE_TARGET**, I think you might want to get ready?" \
-          "**$EHE_TARGET**, you might want to think about arming yourself" \
-          "I think he saw you **$EHE_TERGET!**" \
+          "**$EHE_TARGET**, you might want to think about arming yourself." \
+          "I think he saw you **$EHE_TERGET!**. RUN!" \
           )
           MESS_ACTIVE=${RAND_EHE[ $RANDOM % ${#RAND_EHE[@]} ]}
         curl -H "Content-Type: application/json" -X POST -d "{\"embeds\": [{ \"color\": \"$DISCORDBLUE\", \"title\": \"$TITLE\", \"description\": \"$MESS_ACTIVE\" }] }" $URL
@@ -173,7 +174,7 @@ READER(){
             "Why is it flying back and forth like that?" \
             "I think it might be looking for us!." \
             "I think that he is flying a search pattern" \
-            "If he keeps flying around like that he will bring down a horde on us!" \
+            "If he keeps flying around like that he'll bring down a horde on us!" \
           )
           ;;
 
@@ -181,7 +182,7 @@ READER(){
           RAND_EHE=(\
             "What the hell was that?" \
             "WHAT. IS. HE. DOING" \
-            "WHY IS HEPLAYING THAT AWFUL MUSIC?" \
+            "WHY IS HE PLAYING THAT AWFUL MUSIC?" \
             "Why? Why? Why do this to us?" \
             "What is this guy's problem" \
             "Who **IS** that? What did we ever do to him?" \
@@ -216,6 +217,7 @@ READER(){
       #  NAME TO CHARACTERNAME
       #  THEN SEND LOOK OUT
       #  NOTICE IN DISCROD
+      #  NOT SURE THIS IS POSSIBLE
       ############################
       ############################
       RAND_EHE=(\
@@ -229,8 +231,7 @@ READER(){
     then
       RAND_LEAVE=(\
         "Wait... Why is he leaving?" \
-        "Phew, He is leaving, I think we may be safe now." \
-        "Yeah, thats right, fly away and do not come back!" \
+        "Phew, he's leaving, I think we may be safe now." \
         "I think we are truly alone now" \
       )
       MESS_LEAVE=${RAND_LEAVE[ $RANDOM % ${#RAND_LEAVE[@]} ]}
