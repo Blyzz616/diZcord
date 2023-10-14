@@ -12,27 +12,25 @@ READER(){
 
     DISCONN=$(echo "$line" | grep -E '\[disconnect\]')
 
-    if [[ -n $DISCONN ]];
-    then
-      echo "DISCONN=$DISCONN"
+    if [[ -n $DISCONN ]]; then
+      # we have a disconnection event
+      # get steam id
       DISCONNSTEAM=$(echo "$DISCONN" | grep -E -o 'steam-id=[0-9]*' | awk -F= '{print $2}')
-      echo "DISCONNSTEAM-$DISCONNSTEAM"
+      # get player name
       DISCONNPLAYER=$(echo "$DISCONN" | grep -E -o 'username=.*' | awk -F'"' '{print $2}')
-      echo "DISCONNPLAYER=$DISCONNPLAYER"
-      if [[ -e /opt/pzserver2/dizcord/playerdb/$DISCONNSTEAM.online ]];
-      then
-       echo "/opt/pzserver2/dizcord/playerdb/$DISCONNSTEAM.online exists"
-       GAMESTART=$(cat /opt/pzserver2/dizcord/playerdb/"$DISCONNSTEAM".online)
-       GAMEEND=$(date +%s)
-       GAMETIME=$(( GAMEEND - GAMESTART ))
-       echo $GAMETIME >> /opt/pzserver2/dizcord/playerdb/"$DISCONNSTEAM".total
-       rm /opt/pzserver2/dizcord/playerdb/"$DISCONNSTEAM".online
+      if [[ -e /opt/pzserver2/dizcord/playerdb/"$DISCONNSTEAM".online ]]; then
+        # if the player was online ? get the time  that the player was online and add it to the total for that player
+        GAMESTART=$(cat /opt/pzserver2/dizcord/playerdb/"$DISCONNSTEAM".online)
+        GAMEEND=$(date +%s)
+        GAMETIME=$(( GAMEEND - GAMESTART ))
+        echo "$GAMETIME" >> /opt/pzserver2/dizcord/playerdb/"$DISCONNSTEAM".total
+        rm /opt/pzserver2/dizcord/playerdb/"$DISCONNSTEAM".online
       fi
 
       # Session Time
       if [[ $GAMETIME -eq 0 ]];
       then
-        curl -H "Content-Type: application/json" -X POST -d "{\"embeds\": [{ \"color\": \"$LAVENDER\", \"title\": \"$The mods on the server appear to be out of date.:\", \"description\": \"Restarting the server to update all mods.\nPlease wait a minute before rejoining.\" }] }" $URL
+        curl -H "Content-Type: application/json" -X POST -d "{\"embeds\": [{ \"color\": \"$LAVENDER\", \"title\": \"The mods on the server appear to be out of date.\", \"description\": \"Restarting the server to update all mods.\nPlease wait a minute before rejoining.\" }] }" $URL
         /usr/local/bin/pzuser2/restart.sh &
         exit
       fi
@@ -67,14 +65,26 @@ READER(){
       fi
 
      HOURTIME=$(awk '{ sum += $1 } END { print sum }' /opt/pzserver2/dizcord/playerdb/"$DISCONNSTEAM".total)
-     if [[ $TOTAL -ge 3600  ]];
+     if [[ $HOURTIME -ge 3600  ]];
       then
-        HOURS=$(printf '%d Hours' $((TOTAL/3600)))
+        HOURS=$(printf '%d Hours' $((HOURTIME/3600)))
      fi
 
       # do a lookup to get image name
       IMGNAME=$(grep -E "$DISCONNSTEAM" "/opt/pzserver2/dizcord/playerdb/users.log" | awk '{print $NF}')
-      curl -H "Content-Type: application/json" -X POST -d "{\"embeds\": [{ \"color\": \"$RED\", \"title\": \"$DISCONNPLAYER has disconnected:\", \"description\": \"$DISCONNPLAYER was online for $UPTIME\nTotal time on server: \n $LIFE \n ($HOURS)\", \"thumbnail\": { \"url\": \"$IMGNAME\"} }] }" $URL
+      # if the player died in game and is now rage-quitting, let's shame the hell out of them.
+      if [[ -e /tmp/"$DISCONNSTEAM".dead ]]; then
+        RANDOM=$$$(date +%s)
+        RANDOS=("just couldn't handle the heat" \
+              "rage-quit" \
+              "coulnd't handle the shame" \
+              )
+        MESSAGE=${RANDOS[ $RANDOM % ${#RANDOS[@]} ]}
+        curl -H "Content-Type: application/json" -X POST -d "{\"embeds\": [{ \"color\": \"$RED\", \"title\": \"$DISCONNPLAYER $MESSAGE\", \"description\": \"$DISCONNPLAYER was online for $UPTIME\nTotal time on server: \n $LIFE \n ($HOURS)\", \"thumbnail\": { \"url\": \"$IMGNAME\"} }] }" $URL
+        rm /tmp/"$DISCONNSTEAM".dead
+      else
+        curl -H "Content-Type: application/json" -X POST -d "{\"embeds\": [{ \"color\": \"$RED\", \"title\": \"$DISCONNPLAYER has disconnected:\", \"description\": \"$DISCONNPLAYER was online for $UPTIME\nTotal time on server: \n $LIFE \n ($HOURS)\", \"thumbnail\": { \"url\": \"$IMGNAME\"} }] }" $URL
+      fi
     fi
   done
 }
