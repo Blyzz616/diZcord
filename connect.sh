@@ -1,7 +1,7 @@
 #! /bin/bash
 
 # ADD YOUR DISCORD WEBHOOK TO THE NEXT LINE
-URL='https://discord.com/api/webhooks/1132488373265760266/48oDcTn0Mup1jnZTpOctN0L--qqLOgfEA1_dlIikgvQyi1r5-mS-Jc9_-uF6MqJecvC0'
+URL='https://discord.com/api/webhooks/'
 
 RED=16711680
 PURPLE=8388736
