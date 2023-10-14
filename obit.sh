@@ -2,23 +2,34 @@
 
 RED=16711680
 OBITFILE=""
+touch /opt/pzserver2/dizcord/playerdb/obit.log
 
 # ADD YOUR DISCORD WEBHOOK URL TO THE NEXT LINE
 URL='https://discord.com/api/webhooks/'
 
-# Lets put in some funny death messages
-# Credit where credit is due, I took inspiration from https://www.reddit.com/r/projectzomboid/comments/u3pivr/need_helpsuggestionswitty_comments/
-RANDOS=('just died.' 'has now made ther contribution to the horde.' 'swapped sides.' 'has now completed their playthough.' 'used the wrong hole.' 'kicked the bucket.' 'decided to try something else (it did not work).' 'forgot to pay their tribute to the R-N-Geezus.' 'bought the farm.''is still walking... breathing... not so much' )
-
 OBITUARY(){
   tail -fn0 "$OBITFILE" | \
   while read -r LINE ; do
-
-    # We're gonna need a seed
-    RANDOM=$$$(date +%s)
-
     DEADPLAYER=$(echo "$LINE" | grep -E -o '\S+\sdied' | awk '{print $1}')
     if [[ -n "$DEADPLAYER" ]]; then
+      # Keep a record of who died
+      echo "$(date +%Y-%m-%d_%H:%M:%S) $DEADPLAYER" >> /opt/pzserver2/dizcord/playerdb/obit.log
+      # Do lookup to get dead player's steamID
+      STEAMID=$(grep "$DEADPLAYER" /opt/pzserver2/dizcord/playerdb/alias.log | awk '{print $1}')
+      # Temporary record for Rage-Quit vs Respawn messages
+      touch /tmp/"$STEAMID".dead
+      # Lets put in some funny death messages - Credit where credit is due, I took inspiration from https://www.reddit.com/r/projectzomboid/comments/u3pivr/need_helpsuggestionswitty_comments/
+      RANDOS=("just died." \
+              "has now made ther contribution to the horde." \
+              "swapped sides." \
+              "has now completed their playthough." \
+              "used the wrong hole." \
+              "kicked the bucket." \
+              "decided to try something else (it did not work)." \
+              "forgot to pay their tribute to the R-N-Geezus." \
+              "bought the farm." \
+              "is still walking... breathing... not so much." \
+              )
       MESSAGE=${RANDOS[ $RANDOM % ${#RANDOS[@]} ]}
       OBIT="**$DEADPLAYER** $MESSAGE"
       curl -H "Content-Type: application/json" -X POST -d "{\"embeds\": [{ \"color\": \"$RED\", \"description\": \"$OBIT\" }] }" "$URL"
