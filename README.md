@@ -108,6 +108,9 @@ The join script is not working so nicely, it isn't displaying the user ping as i
 - [ ] Do the above and 'figger out' how to do it with per-server settings
 - [ ] clean code to use best practices
 - [ ] refactor to Python?
+- [ ] Add rage quit messages.
+
+- [ ] Added logic to recognise when someone dies and creates a new character (respanws) with some cool messages for discord.
 
 Notes:
 If you get double quit notifications on player disconnect, it may be an anti-cheat problem.
