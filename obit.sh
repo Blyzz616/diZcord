@@ -84,6 +84,7 @@ READER(){
                 "The zombies might have won this round, but **$DISCONNPLAYER** isn't out for the count. Rejoin and turn the tables on the undead!" \
                 "Apocalypse got you down, **$DISCONNPLAYER**? Quitting won't make it any easier. Rise from the ashes and show the zombies what you're made of!" \
                 "Survival isn't for the faint-hearted. **$DISCONNPLAYER**, the server misses your resilience. Time to show the undead what you're truly capable of!" \
+                "Shame! :bell: Shame! :bell: Shame! :bell: Shame! :bell: Shame! :bell: " \
               )
         MESSAGE=${RANDOS[ $RANDOM % ${#RANDOS[@]} ]}
         curl -H "Content-Type: application/json" -X POST -d "{\"embeds\": [{ \"color\": \"$RED\", \"title\": \"$DISCONNPLAYER Rage-quit\", \"description\": \"$MESSAGE\n\n$DISCONNPLAYER was online for $UPTIME\nTotal time on server: \n $LIFE \n ($HOURS)\", \"thumbnail\": { \"url\": \"$IMGNAME\"} }] }" $URL
