@@ -18,6 +18,7 @@ OBITUARY(){
       STEAMID=$(grep "$DEADPLAYER" /opt/pzserver2/dizcord/playerdb/alias.log | awk '{print $1}')
       # Temporary record for Rage-Quit vs Respawn messages
       touch /tmp/"$STEAMID".dead
+      RANDOM=$$$(date +%s)
       # Lets put in some funny death messages - Credit where credit is due, I took inspiration from https://www.reddit.com/r/projectzomboid/comments/u3pivr/need_helpsuggestionswitty_comments/
       RANDOS=("just died." \
               "has now made ther contribution to the horde." \
