@@ -15,16 +15,16 @@ READER(){
     if [[ -n $DISCONN ]]; then
       # we have a disconnection event
       # get steam id
-      DISCONNSTEAM=$(echo "$DISCONN" | grep -E -o 'steam-id=[0-9]*' | awk -F= '{print $2}')
+      STEAMID=$(echo "$DISCONN" | grep -E -o 'steam-id=[0-9]*' | awk -F= '{print $2}')
       # get player name
       DISCONNPLAYER=$(echo "$DISCONN" | grep -E -o 'username=.*' | awk -F'"' '{print $2}')
-      if [[ -e /opt/pzserver2/dizcord/playerdb/"$DISCONNSTEAM".online ]]; then
+      if [[ -e /opt/pzserver2/dizcord/playerdb/"$STEAMID".online ]]; then
         # if the player was online ? get the time  that the player was online and add it to the total for that player
-        GAMESTART=$(cat /opt/pzserver2/dizcord/playerdb/"$DISCONNSTEAM".online)
+        GAMESTART=$(cat /opt/pzserver2/dizcord/playerdb/"$STEAMID".online)
         GAMEEND=$(date +%s)
         GAMETIME=$(( GAMEEND - GAMESTART ))
-        echo "$GAMETIME" >> /opt/pzserver2/dizcord/playerdb/"$DISCONNSTEAM".total
-        rm /opt/pzserver2/dizcord/playerdb/"$DISCONNSTEAM".online
+        echo "$GAMETIME" >> /opt/pzserver2/dizcord/playerdb/"$STEAMID".total
+        rm /opt/pzserver2/dizcord/playerdb/"$STEAMID".online
       fi
 
       # Session Time
@@ -45,7 +45,7 @@ READER(){
       fi
 
       # Total Time
-      TOTAL=$(awk '{ sum += $1 } END { print sum }' /opt/pzserver2/dizcord/playerdb/"$DISCONNSTEAM".total)
+      TOTAL=$(awk '{ sum += $1 } END { print sum }' /opt/pzserver2/dizcord/playerdb/"$STEAMID".total)
 
       if [[ $TOTAL -ge 86400 ]]; then
         LIFE=$(printf '%dd %dh %dm %ds' $((TOTAL/86400)) $((TOTAL%86400/3600)) $((TOTAL%3600/60)) $((TOTAL%60)))
@@ -57,15 +57,15 @@ READER(){
         LIFE=$(printf '%ds' $((GAMETIME)))
       fi
 
-     HOURTIME=$(awk '{ sum += $1 } END { print sum }' /opt/pzserver2/dizcord/playerdb/"$DISCONNSTEAM".total)
+     HOURTIME=$(awk '{ sum += $1 } END { print sum }' /opt/pzserver2/dizcord/playerdb/"$STEAMID".total)
      if [[ $HOURTIME -ge 3600  ]]; then
         HOURS=$(printf '%d Hours' $((HOURTIME/3600)))
      fi
 
       # do a lookup to get image name
-      IMGNAME=$(grep -E "$DISCONNSTEAM" "/opt/pzserver2/dizcord/playerdb/users.log" | awk '{print $NF}')
+      IMGNAME=$(grep -E "$STEAMID" "/opt/pzserver2/dizcord/playerdb/users.log" | awk '{print $NF}')
       # if the player died in game and is now rage-quitting, let's shame the hell out of them.
-      if [[ -e /tmp/"$DISCONNSTEAM".dead ]]; then
+      if [[ -e /tmp/"$STEAMID".dead ]]; then
         RANDOM=$$$(date +%s)
         RANDOS=("just couldn't handle the heat" \
               "rage-quit" \
@@ -73,7 +73,7 @@ READER(){
               )
         MESSAGE=${RANDOS[ $RANDOM % ${#RANDOS[@]} ]}
         curl -H "Content-Type: application/json" -X POST -d "{\"embeds\": [{ \"color\": \"$RED\", \"title\": \"$DISCONNPLAYER $MESSAGE\", \"description\": \"$DISCONNPLAYER was online for $UPTIME\nTotal time on server: \n $LIFE \n ($HOURS)\", \"thumbnail\": { \"url\": \"$IMGNAME\"} }] }" $URL
-        rm /tmp/"$DISCONNSTEAM".dead
+        rm /tmp/"$STEAMID".dead
       else
         curl -H "Content-Type: application/json" -X POST -d "{\"embeds\": [{ \"color\": \"$RED\", \"title\": \"$DISCONNPLAYER has disconnected:\", \"description\": \"$DISCONNPLAYER was online for $UPTIME\nTotal time on server: \n $LIFE \n ($HOURS)\", \"thumbnail\": { \"url\": \"$IMGNAME\"} }] }" $URL
       fi
