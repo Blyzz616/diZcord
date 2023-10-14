@@ -18,7 +18,6 @@ OBITUARY(){
       STEAMID=$(grep "$DEADPLAYER" /opt/pzserver2/dizcord/playerdb/alias.log | awk '{print $1}')
       # Temporary record for Rage-Quit vs Respawn messages
       touch /tmp/"$STEAMID".dead
-      RANDOM=$$$(date +%s)
       # Lets put in some funny death messages - Credit where credit is due, I took inspiration from https://www.reddit.com/r/projectzomboid/comments/u3pivr/need_helpsuggestionswitty_comments/
       RANDOS=("just died." \
               "has now made ther contribution to the horde." \
@@ -43,15 +42,23 @@ OBITUARY(){
   done
 }
 
-VALIDATE(){
+VALIDATE() {
   OBITDIR="/home/pzuser2/Zomboid/Logs"
   OBITPATTERN="*user.txt"
 
+  # Check if a matching file already exists
+  OBITFILE="$(find "$OBITDIR" -maxdepth 1 -name '*user*')"
+  if [[ -n "$OBITFILE" ]]; then
+    # File already exists, proceed to OBITUARY
+    OBITUARY
+    return
+  fi
+
   # Wait for a file to be created
   while true; do
-    created_file=$(inotifywait -q -e create --format "%f" "$OBITDIR" | grep "$OBITPATTERN")
-    if [[ -n $created_file ]]; then
-      OBITFILE="$(find /home/pzuser2/Zomboid/Logs/ -maxdepth 1 -name '*user*')"
+    created_file=$(inotifywait -q -e create --format "%f" "$OBITDIR" | grep -E "$OBITPATTERN")
+    if [[ -n "$created_file" ]]; then
+      OBITFILE="$(find "$OBITDIR" -maxdepth 1 -name '*user*')"
       break
     fi
     sleep 1
