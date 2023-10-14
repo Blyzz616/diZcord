@@ -7,6 +7,11 @@ RED=16711680
 PURPLE=8388736
 WHITE=16777215
 
+CONNSTEAM=""
+CONNIP=""
+LOGINNAME=""
+CONN_AUTH_DENIED=""
+
 REJOIN(){
     # We're gonna need a seed
     RANDOM=$$$(date +%s)
@@ -37,14 +42,11 @@ REJOIN(){
 
 JOIN(){
 
-  date +%s > /opt/pzserver2/dizcord/playerdb/"$CONNSTEAM".online
+  echo $(date +%s) > /opt/pzserver2/dizcord/playerdb/"$CONNSTEAM".online
 
-  if [[ -z "$OGAMENAME2" ]];
-  then
-    if [[ -z "$OGAMENAME1" ]];
-    then
-      if [[ -z $HRS ]];
-      then
+  if [[ -z "$OGAMENAME2" ]]; then
+    if [[ -z "$OGAMENAME1" ]]; then
+      if [[ -z $HRS ]]; then
         curl -H "Content-Type: application/json" -X POST -d \
         "{\"embeds\": [{ \"color\": \"$PURPLE\", \"title\": \"New connection:\",  \"description\": \"Steam Profile: [$STEAMNAME]($STEAMLINK)\nLogging in as **$LOGINNAME**\", \
         \"thumbnail\": { \"url\": \"$IMGNAME\"} }] }" $URL
@@ -76,8 +78,7 @@ JOIN(){
   fi
 
   # check to see if we have a record of the user, if not, add to users.log and save image.
-  if [[ $(grep -c -E "$CONNSTEAM" /opt/pzserver2/dizcord/playerdb/users.log) -eq 0 ]];
-  then
+  if [[ $(grep -c -E "$CONNSTEAM" /opt/pzserver2/dizcord/playerdb/users.log) -eq 0 ]]; then
     echo -e "$DATE\t$CONNSTEAM\t$STEAMNAME\t$CONNIP\t$LOGINNAME\t$STEAMNAME.$IMGEXT\t$IMGNAME" >> /opt/pzserver2/dizcord/playerdb/users.log
     # format is:
     # FIRST SEEN            STEAMID                 STEAM NAME      IP ADDRESS      login   IMAGE NAME      IMAGE LINK
@@ -85,8 +86,7 @@ JOIN(){
     # 2023-08-21 16:25:21   76561198058880519       Blyzz.com       192.168.0.33    blyzz   Blyzz.com.gif
   fi
   
-  if [[ -n $CONN_AUTH_DENIED ]];
-  then
+  if [[ -n $CONN_AUTH_DENIED ]]; then
     TITLE="Access Denied - Check your credentials."
     curl -H "Content-Type: application/json" -X POST -d "{\"embeds\": [{ \"color\": \"$RED\", \"title\": \"$TITLE\" }] }" $URL
     rm /opt/pzserver2/dizcord/playerdb/"$CONNSTEAM".online
@@ -103,13 +103,10 @@ READER(){
     CONNSTEAM=$(echo "$line" | grep -E '\[fully-connected\]' | grep -E -o 'steam-id=[0-9]+' | awk -F= '{print $2}')
     CONNIP=$(echo "$line" | grep -E -o 'ip=[0-9.]*' | awk -F= '{print $2}')
     LOGINNAME=$(echo "$line" | grep -E -o 'username=.*' | awk -F'"' '{print $2}')
-
     CONN_AUTH_DENIED=$(echo "$line" | grep -E -o 'Client sent invalid server password')
 
-    if [[ -n $CONNSTEAM ]];
-    then
-      if [[ -e /opt/pzserver2/dizcord/playerdb/"$CONNSTEAM".online ]];
-      then
+    if [[ -n $CONNSTEAM ]]; then
+      if [[ -e /opt/pzserver2/dizcord/playerdb/"$CONNSTEAM".online ]]; then
         REJOIN
       else
         JOIN
