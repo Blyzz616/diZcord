@@ -118,6 +118,17 @@ JOIN(){
     # FIRST SEEN            STEAMID                 STEAM NAME      IP ADDRESS      login   IMAGE NAME      IMAGE LINK
     # e.g.
     # 2023-08-21 16:25:21   76561198058880519       Blyzz.com       192.168.0.33    blyzz   Blyzz.com.gif
+    # If they're not in the users log, they're not in the alias log - add that too
+    echo -e "$STEAMID\t$LOGINNAME" >> /opt/pzserver2/dizcord/playerdb/alias.log
+  else
+    if [[ $(grep -c -E "$LOGINNAME" /opt/pzserver2/dizcord/playerdb/alias.log) -eq 0 ]]; then
+    # Ok, so we've got a record of the user in users.log, but no alternate aliases in alias.log so lets save the new username
+    # format is:
+    # STEAMID                 FIRST           OTHERS
+    # e.g.
+    # 76561198058880519       Blyzz           blyzz-test        blyzz-2
+    sed -i -E "/^$STEAMID/ s/$/\t$LOGINNAME/" /opt/pzserver2/dizcord/playerdb/alias.log
+    fi
   fi
 
   if [[ -n $CONN_AUTH_DENIED ]]; then
@@ -130,15 +141,12 @@ JOIN(){
 }
 
 READER(){
-
   tail -Fn0 /home/pzuser2/Zomboid/server-console.txt 2> /dev/null | \
   while read -r line ; do
-
     STEAMID=$(echo "$line" | grep -E '\[fully-connected\]' | grep -E -o 'steam-id=[0-9]+' | awk -F= '{print $2}')
     CONNIP=$(echo "$line" | grep -E -o 'ip=[0-9.]*' | awk -F= '{print $2}')
     LOGINNAME=$(echo "$line" | grep -E -o 'username=.*' | awk -F'"' '{print $2}')
     CONN_AUTH_DENIED=$(echo "$line" | grep -E -o 'Client sent invalid server password')
-
     if [[ -n $STEAMID ]]; then
       if [[ -e /opt/pzserver2/dizcord/playerdb/"$STEAMID".online ]]; then
         REJOIN
