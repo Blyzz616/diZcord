@@ -67,12 +67,27 @@ READER(){
       # if the player died in game and is now rage-quitting, let's shame the hell out of them.
       if [[ -e /tmp/"$STEAMID".dead ]]; then
         RANDOM=$$$(date +%s)
-        RANDOS=("just couldn't handle the heat" \
-              "rage-quit" \
-              "coulnd't handle the shame" \
+        RANDOS=("Looks like **$DISCONNPLAYER's** exit was more dramatic than their survival skills." \
+                "Quitting is easy, surviving is hard. **$DISCONNPLAYER**, the zombies miss you." \
+                "**$DISCONNPLAYER** decided to take a break from survival." \
+                "The apocalypse is tough, but **$DISCONNPLAYER** might be tougher?. Don't let a setback keep you down. Rejoin and conquer!" \
+                "Rage-quitting won't make the zombies go away, **$DISCONNPLAYER**. Come back and show them who's boss!" \
+                "Surviving the apocalypse takes grit, **$DISCONNPLAYER**. Quitting only delays the inevitable. Ready for redemption?" \
+                "Even the best stumble. **$DISCONNPLAYER**, the server needs your resilience. Rise from the ashes and reclaim your survival story!" \
+                "Zombies: 1, **$DISCONNPLAYER**: 0. Are you going to let them have the last laugh? Get back in there and rewrite the ending!" \
+                "Nobody said surviving the apocalypse was easy. **$DISCONNPLAYER**, dust off those setbacks and rejoin the fight!" \
+                "Rage-quitting won't erase the past, **$DISCONNPLAYER**. Redemption is just a login away. The zombies are eagerly awaiting your return." \
+                "Rage-quitting won't erase your past defeats, **$DISCONNPLAYER**. The apocalypse doesn't forgive, but it does offer second chances. Ready for yours?" \
+                "Even the bravest survivors face setbacks. **$DISCONNPLAYER**, the world needs your resilience. Are you up for the challenge?" \
+                "Quitting is easy, but survival is an art. **$DISCONNPLAYER**, your canvas awaits. Ready to paint a new masterpiece?" \
+                "Rage-quitting is a temporary solution. **$DISCONNPLAYER**, the real challenge is staying and fighting. Ready to prove yourself?" \
+                "The zombies might have won this round, but **$DISCONNPLAYER** isn't out for the count. Rejoin and turn the tables on the undead!" \
+                "Apocalypse got you down, **$DISCONNPLAYER**? Quitting won't make it any easier. Rise from the ashes and show the zombies what you're made of!" \
+                "Survival isn't for the faint-hearted. **$DISCONNPLAYER**, the server misses your resilience. Time to show the undead what you're truly capable of!" \
+                "Shame! :bell: Shame! :bell: Shame! :bell: Shame! :bell: Shame! :bell: " \
               )
         MESSAGE=${RANDOS[ $RANDOM % ${#RANDOS[@]} ]}
-        curl -H "Content-Type: application/json" -X POST -d "{\"embeds\": [{ \"color\": \"$RED\", \"title\": \"$DISCONNPLAYER $MESSAGE\", \"description\": \"$DISCONNPLAYER was online for $UPTIME\nTotal time on server: \n $LIFE \n ($HOURS)\", \"thumbnail\": { \"url\": \"$IMGNAME\"} }] }" $URL
+        curl -H "Content-Type: application/json" -X POST -d "{\"embeds\": [{ \"color\": \"$RED\", \"title\": \"$DISCONNPLAYER Rage-quit\", \"description\": \"$MESSAGE\n\n$DISCONNPLAYER was online for $UPTIME\nTotal time on server: \n $LIFE \n ($HOURS)\", \"thumbnail\": { \"url\": \"$IMGNAME\"} }] }" $URL
         rm /tmp/"$STEAMID".dead
       else
         curl -H "Content-Type: application/json" -X POST -d "{\"embeds\": [{ \"color\": \"$RED\", \"title\": \"$DISCONNPLAYER has disconnected:\", \"description\": \"$DISCONNPLAYER was online for $UPTIME\nTotal time on server: \n $LIFE \n ($HOURS)\", \"thumbnail\": { \"url\": \"$IMGNAME\"} }] }" $URL
