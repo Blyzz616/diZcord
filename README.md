@@ -27,18 +27,20 @@ _File list:_
   - When restarting with no arguments, it defaults to a 5-minute restart
   - Unless there are no users connected, in which case it starts shutting down immediately
   - when there are users connected and the restart is set to 1 to 5, a number of warnings are sent to the in-game notification system warnning connected players
-- startup.sh - Announces when the server has finished starting up and can accept connections
-- connect.sh
-  - Announces when a player joins a server and keeps a record of it in playerdb/users.log (one line per user)
+- obit.sh - read a different log file and outputs into the main output file so that the reader can handle it
+- **reader.sh now does all of the below**
+- Announces when the server has finished starting up and can accept connections
+- Announces when a player joins a server and keeps a record of it in playerdb/users.log (one line per user)
     - Fields: First Seen | Steam ID | Steam Name | IP Address | Server Login | Local Image Name | Steam Image Link | Other profiles on server *
   - **Animated GIFS are now supported!**
-  - Keeps a record of failed join attempts in playerdb/denied.log
-  - Keeps a record of when people joined the server in playerdb/access.log (one line per join)
-- discon.sh - Announces when a player leaves the server both when they quit or lose connection - Also Determines if there is workshop mod incompatibility and will restart the server if one exists.
-  - **Animated GIFS are now supported!**
-- chopper.sh - Announces the different states of the chopper event (with some fun random messages). Busy integrating Expanded Helicopter Events (EHE)
-- obit.sh - read a different log file and puts in any deaths that happen on the server
-- shutdown.sh - Announces when the server is being taken down with a server-up timer
+- Keeps a record of failed join attempts in playerdb/denied.log
+- Annonces any deaths that happen on the server
+- If the player quits after dying, a shaming or motivating message displayed about the rage-quit
+- If the player created a new character after dying, a different message is disaplayed
+- Keeps a record of when people joined the server in playerdb/access.log (one line per join)
+- Announces when a player leaves the server both when they quit or lose connection - Also Determines if there is workshop mod incompatibility and will restart the server if one exists.
+- Announces the different states of the chopper event (with some fun random messages). Busy integrating Expanded Helicopter Events (EHE)
+- Announces when the server is being taken down with a server-up timer
 
 _Installation:_
 
@@ -95,7 +97,7 @@ Now join your Project Zomboid server and watch discord for all the glory.
 _Known bugs / To Do:_
 
 The join script is not working so nicely, it isn't displaying the user ping as it should be for some reason. I'll work on it at some point, but for right now, it is working well enough.
-- [ ] Possibly merge all monitoring files to run in one script?
+- [x] Possibly merge all monitoring files to run in one script?
 - [ ] re-write wizard to work with new file structure
 - [ ] fix connect.sh so that pings are displayed correctly
 - [ ] Wizard: add option to support multiple Zomboid servers
@@ -108,10 +110,11 @@ The join script is not working so nicely, it isn't displaying the user ping as i
 - [ ] Do the above and 'figger out' how to do it with per-server settings
 - [ ] clean code to use best practices
 - [ ] refactor to Python?
-- [ ] Add rage quit messages.
-
-- [ ] Added logic to recognise when someone dies and creates a new character (respanws) with some cool messages for discord.
+- [x] Add rage quit messages.
+- [x] Added logic to recognise when someone dies and creates a new character (respanws) with some cool messages for discord.
 
 Notes:
 If you get double quit notifications on player disconnect, it may be an anti-cheat problem.
 Try disabling anti-cheat 21 & 22 in Zomboid Server configuration.
+
+
