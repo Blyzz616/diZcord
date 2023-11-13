@@ -16,7 +16,7 @@ Discord integration for Project Zomboid
 Ok, So this needs to be run on the instance that is running the Project Zomboid server.
 Obviously the OS needs to be Linux with Bourne Again Shell (BASH) and a few other dependencies, listed later.
 You'll also have to have your own Discord Server (or have admin rights to the server) to get a Webhook set up.
-The user that you use to install diZcord should have sudo access.
+~~The user that you use to install diZcord should have sudo access.~~
 
 _File list:_
 
@@ -48,16 +48,17 @@ Open a terminal to your server and make sure that all the dependencies are insta
 
 ```
 sudo apt update -y && sudo apt upgrade -y
-sudo apt install curl screen sed grep whiptail
+sudo apt install curl screen sed grep whiptail xargs
 ```
 
 All of these are installed by default on most distros.
 
-~~_Then run the wizard:_~~
+_Linking the scripts:_
 
-~~```~~
-~~./install-wizard.sh~~
-~~```~~
+```
+ln -s /opt/dizcord/start.sh ~/start.sh
+ln -s /opt/dizcord/restart.sh ~/restart.sh
+```
 
 _Running the scripts:_
 
@@ -68,7 +69,7 @@ cd ~
 sudo ./start.sh
 ```
 
-**CAUTION!** Running multiple instances of these scripts WILL cause duplicated output in discord.
+**CAUTION!** Running multiple instances of these scripts **WILL** cause duplicated output in discord.
 
 _Added Extra:_
 I include cronjobs to do this all for me
@@ -80,7 +81,7 @@ sudo crontab -e
 addthe following lines
 
 ```
-@reboot         /home/boid/start.sh > /dev/null 2
+@reboot         /opt/dizcord/start.sh > /dev/null 2
 ```
 
 If you have a monitor plugged into your server and you want to use it to watch the raw PZ output like me, add this line as well:
@@ -98,7 +99,7 @@ _Known bugs / To Do:_
 
 The join script is not working so nicely, it isn't displaying the user ping as it should be for some reason. I'll work on it at some point, but for right now, it is working well enough.
 - [x] Possibly merge all monitoring files to run in one script?
-- [ ] re-write wizard to work with new file structure
+- [x] re-write wizard to work with new file structure
 - [ ] fix connect.sh so that pings are displayed correctly
 - [ ] Wizard: add option to support multiple Zomboid servers
 - [ ] Wizard: add option to overwrite old settings
@@ -108,7 +109,7 @@ The join script is not working so nicely, it isn't displaying the user ping as i
 - [x] Get Steam Icon working when it is a GIF
 - [ ] Get Expanded HElicopter Events working
 - [ ] Do the above and 'figger out' how to do it with per-server settings
-- [ ] clean code to use best practices
+- [x] clean code to use best practices
 - [ ] refactor to Python?
 - [x] Add rage quit messages.
 - [x] Added logic to recognise when someone dies and creates a new character (respanws) with some cool messages for discord.
