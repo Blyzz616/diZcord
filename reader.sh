@@ -1,7 +1,7 @@
 #! /bin/bash
 
 # The all-important webhook!
-URL='https://discord.com/api/webhooks'
+URL='https://discord.com/api/webhooks/'
 
 # File containing all the colours we use in discord
 source /opt/dizcord/colours.dec
@@ -31,13 +31,12 @@ EHE_CRASH_LOG=""
 EHE_ROAMING=""
 EHE_FLY_OVER=""
 EHE_GO_HOME=""
+EHE_CLASS=""
 DISCONN=""
 DEADPLAYER=""
 
-# get server codename
-SRVRNAME=$(ps aux | grep 'servername' | grep -v grep | grep Project | awk '{print $NF}')
-# This should only run once, when the script is started (when the server comes online)
-date +%s > /tmp/"$SRVRNAME"-up.time
+# This should only run once, when the SCRIPT is started (before the server comes online the server comes online)
+date +%s > /opt/dizcord/times/"$SRVRNAME"-up.time
 
 # We're gonna need a seed for almost everything... and we're gonna be calling it quite a bit so here it is:
 SEED(){
@@ -184,6 +183,11 @@ CHOPPER(){
     fi
   fi
 
+  if [[ -n "$EHE_CLASS" ]]; then
+    TITLE="Chopper type"
+    curl -H "Content-Type: application/json" -X POST -d "{\"embeds\": [{ \"color\": \"$DISCORDBLUE\", \"title\": \"$TITLE\", \"description\": \"||$EHE_CLASS||\" }] }" $URL
+  fi
+
   if [[ -n "$EHE_ROAMING" ]]; then
     case $EHE_TYPE in
 
@@ -228,7 +232,7 @@ DENIED(){
   TITLE="Access Denied - Check your credentials."
   curl -H "Content-Type: application/json" -X POST -d "{\"embeds\": [{ \"color\": \"$RED\", \"title\": \"$TITLE\" }] }" $URL
   rm /opt/dizcord/playerdb/"$STEAMID".online
-  echo "$(date +%Y-%m-%d\ %H:%M:%S) - Steam user $STEAMNAME ($STEAMLINK) was denied connection" >> /home/pz1/denied.log
+  echo "$(date +%Y-%m-%d\ %H:%M:%S) - Steam user $STEAMNAME ($STEAMLINK) was denied connection" >> /opt/dizcord/playerdb/denied.log
 }
 
 REJOIN(){
@@ -256,7 +260,8 @@ REJOIN(){
 }
 
 JOIN(){
-  date +%s > /opt/dizcord/playerdb/"$STEAMID".online
+  touch /opt/dizcord/times/"$STEAMID".online
+  date +%s > /opt/dizcord/times/"$STEAMID".online
 
   STEAMLINK="https://steamcommunity.com/profiles/$STEAMID"
   if [[ $(grep -c "STEAMID" /opt/dizcord/playerdb/users.log) -gt 0 ]]; then
@@ -264,7 +269,7 @@ JOIN(){
     STEAMNAME=$(grep -E "$STEAMID" /opt/dizcord/playerdb/users.log | awk '{print $3}')
     IMGNAME=$(grep -E "$STEAMID" /opt/dizcord/playerdb/users.log | awk '{print $NF}')
   else
-    wget -O /tmp/"$STEAMID".htmnl "$STEAMLINK"
+    wget -O /tmp/"$STEAMID".html "$STEAMLINK"
     #get Steam Username
     STEAMNAME=$(grep -E '<title>' /tmp/"$STEAMID".html | awk '{print $4}' | rev | cut -c10- | rev)
     # get image extension
@@ -368,19 +373,20 @@ DISCON(){
   STEAMLINK=$("https://steamcommunity.com/profiles/$STEAMID")
 
   # If the player was online - write play times
-  if [[ -e /opt/dizcord/playerdb/"$STEAMID".online ]]; then
+  if [[ -e /opt/dizcord/times/"$STEAMID".online ]]; then
     # if the player was online get the time that the player was online and add it to the total for that player
-    GAMESTART=$(cat /opt/dizcord/playerdb/"$STEAMID".online)
+    GAMESTART=$(cat /opt/dizcord/times/"$STEAMID".online)
     GAMEEND=$(date +%s)
     GAMETIME=$(( GAMEEND - GAMESTART ))
-    echo "$GAMETIME" >> /opt/dizcord/playerdb/"$STEAMID".total
-    rm /opt/dizcord/playerdb/"$STEAMID".online
+    touch /opt/dizcord/times/"$STEAMID".total
+    echo "$GAMETIME" >> /opt/dizcord/times/"$STEAMID".total
+    rm /opt/dizcord/times/"$STEAMID".online
   fi
 
   # Session Time
   if [[ $GAMETIME -eq 0 ]]; then
     curl -H "Content-Type: application/json" -X POST -d "{\"embeds\": [{ \"color\": \"$LAVENDER\", \"title\": \"The mods on the server appear to be out of date.\", \"description\": \"Restarting the server to update all mods.\nPlease wait a minute before rejoining.\" }] }" $URL
-    /usr/local/bin/pz1/restart.sh &
+    /opt/dizcord/restart.sh &
     exit
   else
     if [[ $GAMETIME -ge 86400 ]]; then
@@ -395,7 +401,7 @@ DISCON(){
   fi
 
   # Total Time
-  TOTAL=$(awk '{ sum += $1 } END { print sum }' /opt/dizcord/playerdb/"$STEAMID".total)
+  TOTAL=$(awk '{ sum += $1 } END { print sum }' /opt/dizcord/times/"$STEAMID".total)
 
   if [[ $TOTAL -ge 604800 ]]; then
     LIFE=$(printf '%dw %dd %dh %dm %ds' $((TOTAL/604800)) $((TOTAL/86400)) $((TOTAL%86400/3600)) $((TOTAL%3600/60)) $((TOTAL%60)))
@@ -409,7 +415,7 @@ DISCON(){
     LIFE=$(printf '%ds' $((GAMETIME)))
   fi
 
-  HOURTIME=$(awk '{ sum += $1 } END { print sum }' /opt/dizcord/playerdb/"$STEAMID".total)
+  HOURTIME=$(awk '{ sum += $1 } END { print sum }' /opt/dizcord/times/"$STEAMID".total)
   if [[ $HOURTIME -ge 3600  ]]; then
     HOURS=$(printf '%d Hours' $((HOURTIME/3600)))
   fi
@@ -483,13 +489,17 @@ OBIT(){
 STARTUP(){
   # get server codename
   SRVRNAME=$(ps aux | grep 'servername' | grep -v grep | grep Project | awk '{print $NF}')
-  # send timestamp to tmp file
-  RISING=$(cat /tmp/"$SRVRNAME"-start.time)
-  rm /tmp/"$SRVRNAME"-start.time
+  # get the start time from file file
+  RISING=$(cat /opt/dizcord/times/"$SRVRNAME"-start.time)
+  rm /opt/dizcord/times/"$SRVRNAME"-start.time
   RISEN=$(date +%s)
   RISESECS=$(( RISEN - RISING ))
-  touch /opt/dizcord/"$SRVRNAME".up
-  echo "$(date +%c) $SRVRNAME RISESECS" >> /opt/dizcord/"$SRVRNAME".up
+# old
+#  touch /opt/dizcord/"$SRVRNAME".up
+#  echo "$(date +%c) $SRVRNAME RISESECS" >> /opt/dizcord/"$SRVRNAME".up
+# new
+  touch /opt/dizcord/times/"$SRVRNAME".up
+  date +%s > /opt/dizcord/times/"$SRVRNAME".up
 
   if [[ $RISESECS -ge 60 ]]; then
     RISETIME=$(printf '%dm %ds' $((RISESECS/60)) $((RISESECS%60)))
@@ -505,7 +515,7 @@ SHUTDOWN(){
   # get server codename
   SRVRNAME=$(ps aux | grep 'servername' | grep -v grep | grep Project | awk '{print $NF}')
   #get timestamp from srvr-up.time
-  TIMEUP=$(cat /tmp/"$SRVRNAME"-up.time)
+  TIMEUP=$(cat /opt/dizcord/times/"$SRVRNAME"-up.time)
   #calculate up-time
   TIMEDOWN=$(date +%s)
   UPSECS=$(( TIMEDOWN - TIMEUP ))
@@ -559,9 +569,10 @@ READER(){
     EHE_FLY_OVER=$(echo "$LINE" | grep -E "FLEW OVER TARGET \(.*" | awk -F"(" '{print $NF}' | rev | cut -c3- | rev) # Flying over player
     EHE_GO_HOME=$(echo "$LINE" | grep -E "UN-LAUNCH") # End of event
     CONN_AUTH_DENIED=$(echo "$LINE" | grep -E -o 'Client sent invalid server password')
+    EHE_CLASS=$(echo "$LINE" | grep -E -o '---.*target' | awk -F"(" '{print $2}' | awk -F")" '{print $1}')
 
     # Put all the variables in an array
-    CHOPPER_VARS=("CHOP_ACTIVE" "CHOP_ARRIVE" "CHOP_SEARCH" "CHOP_LEAVE" "EHE_LAUNCH" "EHE_TARGET" "EHE_CRASH" "EHE_CRASH_LOG" "EHE_ROAMING" "EHE_FLY_OVER")
+    CHOPPER_VARS=("CHOP_ACTIVE" "CHOP_ARRIVE" "CHOP_SEARCH" "CHOP_LEAVE" "EHE_LAUNCH" "EHE_TARGET" "EHE_CRASH" "EHE_CRASH_LOG" "EHE_ROAMING" "EHE_FLY_OVER" "EHE_CLASS")
     # check if any of them is not empty and call the CHOPPER function
     for CALL_CHOPPER in "${CHOPPER_VARS[@]}"; do
       if [[ -n "${!CALL_CHOPPER}" ]]; then
@@ -596,14 +607,19 @@ INIT(){
   while read -r LINE ; do
     # SERVER STARTUP STUFF
     SRVRUP=$(echo "$LINE" | grep -E -c "SERVER STARTED")
+    ALREADY_LIVE=$(echo "$LINE" | grep -E -c "item  0\s*nil")
     if [[ "$SRVRUP" -gt "0" ]]; then
       STARTUP
+      return
+    fi
+    if [[ "$ALREADY_LIVE" -gt 0 ]];  then
+      READER
       return
     fi
   done
 }
 
-# we reun init first so that the reader dopesn't inspect hundreds of lines of code like 30 times
+# we reun init first so that the reader doesn't inspect hundreds of lines of code like 30 times
 INIT
 # once the server has started, we can start reading it for all the other shit
 READER
@@ -612,4 +628,4 @@ READER
 # Run PZ in it's own screen with a log output to /tmp/PZ.log
 # Run this script in it's own screen session.
 # Run OBIT in a screen session - output death logs to /tmp/PZ.log
-# Obit will also write to /tmp/PZ.log
+
