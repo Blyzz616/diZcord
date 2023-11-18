@@ -9,6 +9,9 @@ Project Zomboid / Discord integration
 
 ![Server reboot](https://github.com/Blyzz616/diZcord/assets/19424317/2b7ea92c-263e-4720-b6ff-c5cb81d4bc29)
 
+![Discord Server Control](https://github.com/Blyzz616/diZcord/assets/19424317/641c7688-3800-4b34-bfee-895f68943d2a)
+
+
 **# DiZcord**
 Discord integration for Project Zomboid. Sends feature-rich information to a text channel in discord.
 I've now also added a discord bot to control the discord server from a discord channel. **BE VERY CAREFUL WITH THIS!**
