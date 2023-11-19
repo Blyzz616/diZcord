@@ -52,10 +52,10 @@ Open a terminal to your server and make sure that all the dependencies are insta
 
 ```
 sudo apt update -y && sudo apt upgrade -y
-sudo apt install curl screen sed grep whiptail xargs
+sudo apt install curl screen sed grep whiptail xargs jq
 ```
 
-All of these are installed by default on most distros.
+Most of these are installed by default on most distros.
 
 _Linking the scripts:_
 
