@@ -515,7 +515,7 @@ SHUTDOWN(){
   # get server codename
   SRVRNAME=$(ps aux | grep 'servername' | grep -v grep | grep Project | awk '{print $NF}')
   #get timestamp from srvr-up.time
-  TIMEUP=$(cat /opt/dizcord/times/"$SRVRNAME"-up.time)
+  TIMEUP=$(cat /opt/dizcord/times/"$SRVRNAME".up)
   #calculate up-time
   TIMEDOWN=$(date +%s)
   UPSECS=$(( TIMEDOWN - TIMEUP ))
