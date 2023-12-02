@@ -9,8 +9,8 @@ OBITUARY(){
     echo "$LINE" >> /home/pz1/Zomboid/server-console.txt
 
     # test if the OBIT file is still the current log file
-    if [[ "$OBITFILE" != $(find /home/pzuser2/Zomboid/Logs/ -maxdepth 1 -name "*user*" | tail -n1) ]]; then
-      OBITFILE="$(find /home/pzuser2/Zomboid/Logs/ -maxdepth 1 -name '*user*')"
+    if [[ "$OBITFILE" != $(find /home/pz1/Zomboid/Logs/ -maxdepth 1 -name "*user*" | tail -n1) ]]; then
+      OBITFILE="$(find /home/pz1/Zomboid/Logs/ -maxdepth 1 -name '*user*')"
     fi
   done
 }
