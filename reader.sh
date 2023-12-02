@@ -271,7 +271,8 @@ JOIN(){
   else
     wget -O /tmp/"$STEAMID".html "$STEAMLINK"
     #get Steam Username
-    STEAMNAME=$(grep -E '<title>' /tmp/"$STEAMID".html | awk '{print $4}' | rev | cut -c10- | rev)
+    STEAMNAME=$(grep -E '<title>' /tmp/"$STEAMID".html | awk -F":" '{print $3}' | xargs | awk -F"<" '{print $1}')
+    #STEAMNAME=$(grep -E '<title>' /tmp/"$STEAMID".html | awk '{print $4}' | rev | cut -c10- | rev)
     # get image extension
     # some profiles have backgrounds, if they do, then we need to modify the code to ignore them
     if grep -q 'has_profile_background' /tmp/"$STEAMID".html; then
