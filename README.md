@@ -124,4 +124,4 @@ Notes:
 If you get double quit notifications on player disconnect, it may be an anti-cheat problem.
 Try disabling anti-cheat 21 & 22 in Zomboid Server configuration.
 
-
+And lastly, if you made it this far and want to buy me a beer (or a laptop), please feel free to make a donation on my [Ko-fi](https://ko-fi.com/blyzz)
