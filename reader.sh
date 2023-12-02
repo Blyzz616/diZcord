@@ -4,7 +4,7 @@
 URL='https://discord.com/api/webhooks/'
 
 # File containing all the colours we use in discord
-source /opt/dizcord/colours.dec
+source /opt/dizcord/colours.sh
 
 # We're gonna need a lot off files to be present:
 touch /home/pz1/crash.true
@@ -35,8 +35,8 @@ EHE_CLASS=""
 DISCONN=""
 DEADPLAYER=""
 
-# This should only run once, when the SCRIPT is started (before the server comes online the server comes online)
-date +%s > /opt/dizcord/times/"$SRVRNAME"-up.time
+# This should only run once, when the SCRIPT is started (before the server comes online)
+date +%s > /opt/dizcord/times/"$SRVRNAME".up
 
 # We're gonna need a seed for almost everything... and we're gonna be calling it quite a bit so here it is:
 SEED(){
@@ -266,7 +266,7 @@ JOIN(){
   STEAMLINK="https://steamcommunity.com/profiles/$STEAMID"
   if [[ $(grep -c "STEAMID" /opt/dizcord/playerdb/users.log) -gt 0 ]]; then
     #use local info to reduce unnecessary net lookups
-    STEAMNAME=$(grep -E "$STEAMID" /opt/dizcord/playerdb/users.log | awk '{print $3}')
+    STEAMNAME=$(grep -E "$STEAMID" /opt/dizcord/playerdb/users.log | awk -F"\t" '{print $2}')
     IMGNAME=$(grep -E "$STEAMID" /opt/dizcord/playerdb/users.log | awk '{print $NF}')
   else
     wget -O /tmp/"$STEAMID".html "$STEAMLINK"
@@ -305,8 +305,13 @@ JOIN(){
 
   # lets keep a record of who joins the server
   touch /opt/dizcord/playerdb/users.log /opt/dizcord/playerdb/access.log /opt/dizcord/playerdb/denied.log
+  
+  if [[ $(wc -l /opt/dizcord/playerdb/users.log) -eq 0 ]]; then
+    echo -e 'FIRST SEEN\tSTEAMID\tSTEAM-NAME\tIP ADDRESS\tlogin\tIMAGE NAME\tIMAGE LINK' > /opt/dizcord/playerdb/users.log
+  fi  
+  
   echo "$(date +%Y-%m-%d\ %H:%M:%S) - Steam user $STEAMNAME ($STEAMLINK) attempted connection" >> /opt/dizcord/playerdb/access.log
-
+  
   if [[ -z "$OGAMENAME2" ]]; then
     if [[ -z "$OGAMENAME1" ]]; then
       if [[ -z $HRS ]]; then
@@ -370,7 +375,7 @@ JOIN(){
 
 DISCON(){
   STEAMID=$(echo "$DISCONN" | grep -E -o 'steam-id=[0-9]*' | awk -F= '{print $2}')
-  STEAMNAME=$(grep "$STEAMID" /opt/dizcord/playerdb/users.log | awk '{print $4}')
+  STEAMNAME=$(grep "$STEAMID" /opt/dizcord/playerdb/users.log | awk -F"\t" '{print $3}')
   STEAMLINK=$("https://steamcommunity.com/profiles/$STEAMID")
 
   # If the player was online - write play times
@@ -570,7 +575,7 @@ READER(){
     EHE_FLY_OVER=$(echo "$LINE" | grep -E "FLEW OVER TARGET \(.*" | awk -F"(" '{print $NF}' | rev | cut -c3- | rev) # Flying over player
     EHE_GO_HOME=$(echo "$LINE" | grep -E "UN-LAUNCH") # End of event
     CONN_AUTH_DENIED=$(echo "$LINE" | grep -E -o 'Client sent invalid server password')
-    EHE_CLASS=$(echo "$LINE" | grep -E -o '---.*target' | awk -F"(" '{print $2}' | awk -F")" '{print $1}')
+    EHE_CLASS=$(echo "$LINE" | grep -E -o "---.*target" | awk -F"(" '{print $2}' | awk -F")" '{print $1}')
 
     # Put all the variables in an array
     CHOPPER_VARS=("CHOP_ACTIVE" "CHOP_ARRIVE" "CHOP_SEARCH" "CHOP_LEAVE" "EHE_LAUNCH" "EHE_TARGET" "EHE_CRASH" "EHE_CRASH_LOG" "EHE_ROAMING" "EHE_FLY_OVER" "EHE_CLASS")
