@@ -4,7 +4,7 @@ URL='https://discord.com/api/webhooks/'
 RED=16711680
 ORANGE=16753920
 PLAYERS="Survivors still connected:"
-DOWN="**Rotting Domain** server going down now."
+DOWN="**<SERVER NAME>** server going down now."
 
 touch /tmp/connected.players
 touch /tmp/connected.num
@@ -94,13 +94,13 @@ SRVDN(){
     SRV=$(echo "$line" | grep -E -o 'SSteamSDK: LogOff')
     if [[ -n $KICKSTEAM ]];
     then
-      if [[ -e /opt/pzserver2/dizcord/playerdb/$DISCONNSTEAM.online ]];
+      if [[ -e /opt/dizcord/playerdb/$DISCONNSTEAM.online ]];
       then
-        GAMESTART=$(cat /opt/pzserver2/dizcord/playerdb/"$DISCONNSTEAM".online)
+        GAMESTART=$(cat /opt/dizcord/playerdb/"$DISCONNSTEAM".online)
         GAMEEND=$(date +%s)
         GAMETIME=$(( GAMEEND - GAMESTART ))
-        echo $GAMETIME >> /opt/pzserver2/dizcord/playerdb/"$DISCONNSTEAM".total
-        rm /opt/pzserver2/dizcord/playerdb/"$DISCONNSTEAM".online
+        echo $GAMETIME >> /opt/dizcord/playerdb/"$DISCONNSTEAM".total
+        rm /opt/dizcord/playerdb/"$DISCONNSTEAM".online
       fi
 
       # Session Time
@@ -118,7 +118,7 @@ SRVDN(){
       fi
 
       # Total Time
-      TOTAL=$(awk '{ sum += $1 } END { print sum }' /opt/pzserver2/dizcord/playerdb/"$DISCONNSTEAM".total)
+      TOTAL=$(awk '{ sum += $1 } END { print sum }' /opt/dizcord/playerdb/"$DISCONNSTEAM".total)
 
       if [[ $TOTAL -ge 86400 ]];
       then
@@ -132,7 +132,7 @@ SRVDN(){
       else
         LIFE=$(printf '%ds' $((GAMETIME)))
       fi
-      IMGNAME=$(grep -E "$DISCONNSTEAM" "/opt/pzserver2/dizcord/playerdb/users.log" | awk '{print $NF}')
+      IMGNAME=$(grep -E "$DISCONNSTEAM" "/opt/dizcord/playerdb/users.log" | awk '{print $NF}')
       curl -H "Content-Type: application/json" -X POST -d "{\"embeds\": [{ \"color\": \"$RED\", \"title\": \"$DISCONNPLAYER has disconnected:\", \"description\": \"$DISCONNPLAYER was online for $UPTIME\nTotal time on server: $LIFE\", \"thumbnail\": { \"url\": \"$IMGNAME\"} }] }" $URL
     fi
     if [[ -n  "$SRV" ]];
@@ -146,7 +146,7 @@ SRVDN(){
 
 READER(){
   SENT
-  tail -Fn0 /home/pzuser2/Zomboid/server-console.txt 2> /dev/null | \
+  tail -Fn0 /home/pz1/Zomboid/server-console.txt 2> /dev/null | \
   while read -r line ; do
     CONNECTEDNUM=$(echo "$line" | grep -E -o 'connected .[1-9]*' | awk -F"(" '{print $2}')
     echo "CONNECTEDNUM = $CONNECTEDNUM"
