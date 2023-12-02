@@ -20,4 +20,4 @@ sleep 5
 # 30 seconds
 screen -S PZ2 -p 0 -X stuff "servermsg \"Get to Safety.\" ^M"
 sleep 30
-/opt/pzserver2/dizcord/fourmin.sh
+/opt/dizcord/fourmin.sh
