@@ -116,7 +116,7 @@ The join script is not working so nicely, it isn't displaying the user ping as i
 - [x] clean code to use best practices
 - [ ] refactor to Python?
 - [ ] Save all settings (server name/ports/webhook url/ etc) for updates
-- [ ] 
+- [ ] Change "Last played on" to reflect "today" and "yesterday"
 - [x] Add rage quit messages.
 - [x] Added logic to recognise when someone dies and creates a new character (respanws) with some cool messages for discord.
 
