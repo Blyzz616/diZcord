@@ -264,7 +264,7 @@ JOIN(){
   date +%s > /opt/dizcord/times/"$STEAMID".online
 
   STEAMLINK="https://steamcommunity.com/profiles/$STEAMID"
-  if [[ $(grep -c "STEAMID" /opt/dizcord/playerdb/users.log) -gt 0 ]]; then
+  if [[ $(grep -c "$STEAMID" /opt/dizcord/playerdb/users.log) -gt 0 ]]; then
     #use local info to reduce unnecessary net lookups
     STEAMNAME=$(grep -E "$STEAMID" /opt/dizcord/playerdb/users.log | awk -F"\t" '{print $2}')
     IMGNAME=$(grep -E "$STEAMID" /opt/dizcord/playerdb/users.log | awk '{print $NF}')
