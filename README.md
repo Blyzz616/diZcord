@@ -124,4 +124,16 @@ Notes:
 If you get double quit notifications on player disconnect, it may be an anti-cheat problem.
 Try disabling anti-cheat 21 & 22 in Zomboid Server configuration.
 
-And lastly, if you made it this far and want to buy me a beer (or a laptop), please feel free to make a donation on my [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/A0A2RROUR)
+And lastly, if you made it this far and want to buy me a beer (or a laptop), please feel free to make a donation on my ko-fi!
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/A0A2RROUR)
+
+Project Whiptail:
+- [ ] Search for any existing Zomboid installs
+- [ ] Display ALL Zomboid Installations and ask which this will be for with radio-button style
+- [ ] Ask for the Server name
+- [ ] Ask for the webhook
+- [ ] Send message to web hook to test and ask if message was received
+~~- [ ] Ask if you want bot control~~ (too difficult if prereq not installed)
+- [ ] Ask if crontab entry should be added
+- [ ] Maybe set this up as a service (unit file)?
+- [ ] Have Instruction as last page how to control the server using scripts.
