@@ -128,9 +128,9 @@ And lastly, if you made it this far and want to buy me a beer (or a laptop), ple
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/A0A2RROUR)
 
 Project Whiptail:
-- [ ] Search for any existing Zomboid installs
-- [ ] Display ALL Zomboid Installations and ask which this will be for with radio-button style
-- [ ] Ask for the Server name
+- [x] Search for any existing Zomboid installs
+- [x] Display ALL Zomboid Installations and ask which this will be for with radio-button style
+- [x] Ask for the Server name
 - [ ] Ask for the webhook
 - [ ] Send message to web hook to test and ask if message was received
 ~~- [ ] Ask if you want bot control~~ (too difficult if prereq not installed)
