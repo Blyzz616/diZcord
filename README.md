@@ -131,9 +131,9 @@ Project Whiptail:
 - [x] Search for any existing Zomboid installs
 - [x] Display ALL Zomboid Installations and ask which this will be for with radio-button style
 - [x] Ask for the Server name
-- [ ] Ask for the webhook
-- [ ] Send message to web hook to test and ask if message was received
-~~- [ ] Ask if you want bot control~~ (too difficult if prereq not installed)
+- [x] Ask for the webhook
+- [x] Send message to web hook to test and ask if message was received
+~~Ask if you want bot control~~ (too difficult if prereq not installed)
 - [ ] Ask if crontab entry should be added
 - [ ] Maybe set this up as a service (unit file)?
 - [ ] Have Instruction as last page how to control the server using scripts.
