@@ -15,10 +15,10 @@ if [[ $CURRENT_VERSION !=  $LATEST_VERSION ]]; then
   echo "$LATEST_VERSION" > /opt/dizcord/current.version
 fi
 
-if [[ $(ps aux | grep ProjectZomboid64 | grep -v grep | wc -l ) -eq 1 ]]; then
-  /opt/dizcord/restart.sh &
-  exit
-else
-  /opt/dizcord/start.sh &
-  exit
-fi
+#if [[ $(ps aux | grep ProjectZomboid64 | grep -v grep | wc -l ) -eq 1 ]]; then
+#  /opt/dizcord/restart.sh &
+#  exit
+#else
+#  /opt/dizcord/start.sh &
+#  exit
+#fi
