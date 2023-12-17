@@ -134,6 +134,10 @@ Project Whiptail:
 - [x] Ask for the webhook
 - [x] Send message to web hook to test and ask if message was received
 - [ ] Ask if crontab entry should be added
+- [ ] check for existing crontab entries
+- [ ] Ask how many times a day
+- [ ] Get the 1st time and calculate other times
+- [ ] Convert times to crontab format
 - [ ] Maybe set this up as a service (unit file)?
 - [ ] Have Instruction as last page how to control the server using scripts.
 - [ ] 
