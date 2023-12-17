@@ -136,4 +136,5 @@ Project Whiptail:
 - [ ] Ask if crontab entry should be added
 - [ ] Maybe set this up as a service (unit file)?
 - [ ] Have Instruction as last page how to control the server using scripts.
+- [ ] 
 ~~Ask if you want bot control~~ (too difficult if prereq not installed)
