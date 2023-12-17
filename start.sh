@@ -1,7 +1,8 @@
 #!/bin/bash
 
 URL='https://discord.com/api/webhooks/'
-BLUE=45015
+
+source /opt/dizcord/colours.dec
 
 MESSAGE="**Blighted Dominion** server reanimating now."
 
