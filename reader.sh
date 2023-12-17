@@ -4,7 +4,7 @@
 URL='https://discord.com/api/webhooks/'
 
 # File containing all the colours we use in discord
-source /opt/dizcord/colours.sh
+source /opt/dizcord/colours.dec
 
 # We're gonna need a lot off files to be present:
 touch /home/pz1/crash.true
