@@ -133,7 +133,7 @@ Project Whiptail:
 - [x] Ask for the Server name
 - [x] Ask for the webhook
 - [x] Send message to web hook to test and ask if message was received
-~~- [ ] Ask if you want bot control~~ (too difficult if prereq not installed)
 - [ ] Ask if crontab entry should be added
 - [ ] Maybe set this up as a service (unit file)?
 - [ ] Have Instruction as last page how to control the server using scripts.
+~~Ask if you want bot control~~ (too difficult if prereq not installed)
