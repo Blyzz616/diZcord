@@ -25,4 +25,4 @@ screen -S PZ-obit -p 0 -X stuff "/opt/dizcord/obit.sh ^M"
 
 [[ $(screen -ls | grep -c -E 'PZ-bot') -eq 0 ]] && \
 screen -dm -s /bin/bash -S PZ-bot && \
-screen -S PZ-obit -p 0 -X stuff "/usr/bin/node /opt/boidbot/bot.sh ^M"
+screen -S PZ-bot -p 0 -X stuff "/usr/bin/node /opt/boidbot/bot.sh ^M"
