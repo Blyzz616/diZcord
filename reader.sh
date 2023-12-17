@@ -260,6 +260,7 @@ REJOIN(){
 }
 
 JOIN(){
+  today=
   touch /opt/dizcord/times/"$STEAMID".online
   date +%s > /opt/dizcord/times/"$STEAMID".online
 
@@ -298,8 +299,20 @@ JOIN(){
   # Lets get other games from steam (NAME is game name LAST is last played, HRS is hours in that game)
   OGAMENAME1=$(grep -E -A4 "\"game_capsule\""  /tmp/"$STEAMID".html | grep -v 108600 | grep -E "whiteLink" | head -n1 | xargs | sed 's/.*app\/[0-9]*>//'  | rev | cut -c12- | rev)
   OGAMENAME2=$(grep -E -A4 "\"game_capsule\""  /tmp/"$STEAMID".html | grep -v 108600 | grep -E "whiteLink" | tail -n1 | xargs | sed 's/.*app\/[0-9]*>//'  | rev | cut -c12- | rev)
-  OGAMELAST1=$(grep -E -A4 "\"game_capsule\""  /tmp/"$STEAMID".html | grep -v 108600 | sed 's/^\s*//' | tail -n10 | grep -o -E 'last.*'| head -n1 | rev | cut -c9- | rev | sed 's/on/on:/' | sed 's/.*/\u&/' | xargs)
-  OGAMELAST2=$(grep -E -A4 "\"game_capsule\""  /tmp/"$STEAMID".html | grep -v 108600 | sed 's/^\s*//' | tail -n10 | grep -o -E 'last.*'| tail -n1 | rev | cut -c9- | rev | sed 's/on/on:/' | sed 's/.*/\u&/' | xargs)
+  if [[ $(grep -E -A4 "\"game_capsule\""  /tmp/"$STEAMID".html | grep -v 108600 | sed 's/^\s*//' | tail -n10 | grep -o -E 'last.*'| head -n1 | rev | cut -c9- | rev | sed 's/ on/:/' | sed 's/.*/\u&/' | xargs | awk '{print $3 " " $4}') = $(date +%d" "%b) ]]; then
+    OGAMELAST1="Last played: Today"
+  elif [[ $(grep -E -A4 "\"game_capsule\""  /tmp/"$STEAMID".html | grep -v 108600 | sed 's/^\s*//' | tail -n10 | grep -o -E 'last.*'| head -n1 | rev | cut -c9- | rev | sed 's/ on/:/' | sed 's/.*/\u&/' | xargs | awk '{print $3 " " $4}') = $(date -d "yesterday" +%d" "%b) ]]; then
+    OGAMELAST1="Last played: Yesterday"
+  else
+    OGAMELAST1=$(grep -E -A4 "\"game_capsule\""  /tmp/"$STEAMID".html | grep -v 108600 | sed 's/^\s*//' | tail -n10 | grep -o -E 'last.*'| head -n1 | rev | cut -c9- | rev | sed 's/ on/:/' | sed 's/.*/\u&/' | xargs)
+  fi
+  if [[ $(grep -E -A4 "\"game_capsule\""  /tmp/"$STEAMID".html | grep -v 108600 | sed 's/^\s*//' | tail -n10 | grep -o -E 'last.*'| tail -n1 | rev | cut -c9- | rev | sed 's/ on/:/' | sed 's/.*/\u&/' | xargs) = $(date +%d" "%b) ]]; then
+    OGAMELAST2="Last played: Today"
+  elif [[ $(grep -E -A4 "\"game_capsule\""  /tmp/"$STEAMID".html | grep -v 108600 | sed 's/^\s*//' | tail -n10 | grep -o -E 'last.*'| tail -n1 | rev | cut -c9- | rev | sed 's/ on/:/' | sed 's/.*/\u&/' | xargs) = $(date -d "yesterday" +%d" "%b) ]]; then
+    OGAMELAST2="Last played: Yesterday"
+  else
+    OGAMELAST2=$(grep -E -A4 "\"game_capsule\""  /tmp/"$STEAMID".html | grep -v 108600 | sed 's/^\s*//' | tail -n10 | grep -o -E 'last.*'| tail -n1 | rev | cut -c9- | rev | sed 's/ on/:/' | sed 's/.*/\u&/' | xargs)
+  fi
   OGAMEHRS1=$(grep -E -A4 "\"game_capsule\""  /tmp/"$STEAMID".html | grep -v 108600 | sed 's/^\s*//' | tail -n10 | grep -o -E '.*ord' | head -n1)
   OGAMEHRS2=$(grep -E -A4 "\"game_capsule\""  /tmp/"$STEAMID".html | grep -v 108600 | sed 's/^\s*//' | tail -n10 | grep -o -E '.*ord' | tail -n1)
 
