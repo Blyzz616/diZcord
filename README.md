@@ -118,7 +118,8 @@ The join script is not working so nicely, it isn't displaying the user ping as i
 - [ ] Save all settings (server name/ports/webhook url/ etc) for updates
 - [ ] Change "Last played on" to reflect "today" and "yesterday"
 - [x] Add rage quit messages.
-- [x] Added logic to recognise when someone dies and creates a new character (respanws) with some cool messages for discord.
+- [ ] Added logic to recognise when someone dies and creates a new character (respanws) with some cool messages for discord.
+- [ ] Figure out the server up time with server name in `restart.sh` line 14
 
 Notes:
 If you get double quit notifications on player disconnect, it may be an anti-cheat problem.
