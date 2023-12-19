@@ -7,36 +7,37 @@ sudo chown "$(whoami)":"$(whoami)"/opt/dizcord/times
 sudo chown "$(whoami)":"$(whoami)"/opt/dizcord/boidbot
 
 # Welcome screen
-whiptail --title "Project Zomboid Server Integration" --msgbox "Welcome to the installation wizard.\n\nThis tool will help you integrate your Project Zomboid Server with your Discord server." 10 60
+whiptail --title "Project Zomboid Server Integration" --msgbox "Welcome to the installation wizard.\n\nThis tool will help you integrate your Project Zomboid Server with your Discord server.\n\nYou should already have your Project Zomboid Server set up and running." 10 60
 
-# Check for server-console.txt
-RESULTS=($(find / -name server-console.txt 2>/dev/null))
+# Check for server config file (...../Zomboid/Server/<somename>.ini)
+RESULTS=$(find / -type f -path "*/Zomboid/Server/*.ini" 2>/dev/null)
+INIFILE=$(find / -type f -path "*/Zomboid/Server/*.ini" 2>/dev/null | awk -F"/" '{print $NF}')
 
 if [ "${#RESULTS[@]}" -eq 0 ]; then
-  # Ask for installation directory if server-console.txt is not found
-  INSTALL_DIR=$(whiptail --inputbox "I could not find the Project Zomboid installation directory. Please enter the installation directory for Project Zomboid:" 10 60 3>&1 1>&2 2>&3)
+  # Ask for installation directory if servername.ini is not found
+  INILOCATION=$(whiptail --inputbox "I could not find the Project Zomboid installation. Please enter the full path to the .INI file for your Project Zomboid Server:" 10 60 3>&1 1>&2 2>&3)
 
   # Validate the directory
-  if [ -z "$INSTALL_DIR" ]; then
+  if [ -z "$INILOCATION" ]; then
     # If the installation directory is empty, show an error and exit
     whiptail --title "Error" --msgbox "Installation directory cannot be empty. Exiting." 10 60
     exit 1
   fi
 elif [ "${#RESULTS[@]}" -eq 1 ]; then
   # Display the single result and ask for confirmation
-  PARENT_DIR=$(dirname "${RESULTS[0]}")
-  whiptail --title "Confirm Installation Directory" --yesno "I found a Project Zomboid installation in the following directory:\n\n$PARENT_DIR\n\nIs this the correct installation directory?" 10 60
+  INIFILE="${RESULTS[0]}"
+  whiptail --title "Confirm Config File" --yesno "I found a Project Zomboid configuration file called $INIFILE.\n\nIs this the correct config file from your server?" 10 60
 
   # Check the user's choice
   if [ $? -eq 0 ]; then
-    # If the user confirms, set INSTALL_DIR to the found directory
-    INSTALL_DIR="$PARENT_DIR"
+    # If the user confirms, set INILOCATION to the found directory
+    INILOCATION="$PARENT_DIR"
   else
     # Ask the user to manually enter the installation directory
-    INSTALL_DIR=$(whiptail --inputbox "Please enter the installation directory for Project Zomboid:" 10 60 3>&1 1>&2 2>&3)
+    INILOCATION=$(whiptail --inputbox "Please enter the full path to the .INI file for Project Zomboid (including the file itself):" 10 60 3>&1 1>&2 2>&3)
   fi
 else
-  # Display a list of parent directories and ask the user to choose
+  # Display a list of INI files and ask the user to choose
   OPTIONS=()
   for ((i = 0; i < ${#RESULTS[@]}; i++)); do
     PARENT_DIR=$(dirname "${RESULTS[i]}")
@@ -46,7 +47,7 @@ else
   SELECTED_INDEX=$(whiptail --title "Select Installation Directory" --menu "Please select the correct installation directory:" 20 60 10 "${OPTIONS[@]}" 3>&1 1>&2 2>&3)
 
   # Set the installation directory to the user's choice
-  INSTALL_DIR="${RESULTS[SELECTED_INDEX]}"
+  INILOCATION="${RESULTS[SELECTED_INDEX]}"
 fi
 
 # Ask the user to enter a server name
@@ -327,6 +328,6 @@ else
 fi
 
 # DISPLAY THE CHOSEN INSTALLATION DIRECTORY, SERVER NAME, WEBHOOK, AND OTP
-whiptail --title "Installation Summary" --msgbox "Installation Directory: $INSTALL_DIR\nServer Name: $SERVER_NAME\nDiscord Webhook: $WEBHOOK\nOTP: $OTP\n\nPress OK to proceed with the installation." 10 60
+whiptail --title "Installation Summary" --msgbox "Installation Directory: $INILOCATION\nServer Name: $SERVER_NAME\nDiscord Webhook: $WEBHOOK\nOTP: $OTP\n\nPress OK to proceed with the installation." 10 60
 
 # TO DO Finish it up - make it workable
