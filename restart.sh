@@ -126,7 +126,7 @@ SHUTDOWN(){
           screen -S PZ -X stuff "^C" # Send Ctrl+C to screen session PZ
           sleep 5 # Wait for 5 seconds
           screen -S PZ -X stuff "exit ^M" # Send 'exit' to screen session PZ
-          /usr/local/bin/pz1/start.sh & # Fire the server up again.
+          /opt/dizcord/start.sh & # Fire the server up again.
           break # Exit the loop
         fi
       fi
