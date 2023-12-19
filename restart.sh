@@ -11,7 +11,7 @@ echo "0" > /tmp/dwn.cmd
 
 TIMECALC () {
   #get timestamp from srvr-up.time
-  TIMEUP=$(</tmp/srvr2-up.time)
+  TIMEUP=$(</opt/dizcord/times/blight.up)
   #calculate up-time
   TIMEDOWN=$(date +%s)
   UPSECS=$(( TIMEDOWN - TIMEUP ))
