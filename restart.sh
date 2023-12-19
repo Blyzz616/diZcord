@@ -114,7 +114,7 @@ SHUTDOWN(){
   else
     echo "BP6" >> /tmp/restart.log # Append "BP6" to the restart.log file
     screen -S PZ -X stuff "quit^M" # Send 'quit' to screen session PZ
-    tail -Fn0 /home/pz1/Zomboid/server-console.txt 2> /dev/null | \ # Start tailing the Zomboid server console log
+    tail -Fn0 /home/pz1/Zomboid/server-console.txt 2> /dev/null | \
     while read -r line; do # Read each line in the console log
       echo "BP7" >> /tmp/restart.log # Append "BP7" to the restart.log file
       DOWNSVR=$(echo "$line" | grep -c -E "SSteamSDK: LogOff") # Search for 'SSteamSDK: LogOff' in the line
