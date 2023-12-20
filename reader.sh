@@ -267,7 +267,7 @@ JOIN(){
   STEAMLINK="https://steamcommunity.com/profiles/$STEAMID"
   if [[ $(grep -c "$STEAMID" /opt/dizcord/playerdb/users.log) -gt 0 ]]; then
     #use local info to reduce unnecessary net lookups
-    STEAMNAME=$(grep -E "$STEAMID" /opt/dizcord/playerdb/users.log | awk -F"\t" '{print $2}')
+    STEAMNAME=$(grep -E "$STEAMID" /opt/dizcord/playerdb/users.log | awk -F"\t" '{print $3}')
     IMGNAME=$(grep -E "$STEAMID" /opt/dizcord/playerdb/users.log | awk '{print $NF}')
   else
     wget -O /tmp/"$STEAMID".html "$STEAMLINK"
