@@ -1,9 +1,10 @@
 #!/bin/bash
 
 # Set up directories
-sudo mkdir -p /opt/dizcord/playerdb /opt/dizcord/times /opt/dizcord/boidbot
+sudo mkdir -p /opt/dizcord/playerdb/html /opt/dizcord/times /opt/dizcord/boidbot
 sudo chown "$(whoami)":"$(whoami)" /opt/dizcord/playerdb 
-sudo chown "$(whoami)":"$(whoami)"/opt/dizcord/times 
+sudo chown "$(whoami)":"$(whoami)" /opt/dizcord/playerdb/html
+sudo chown "$(whoami)":"$(whoami)"/opt/dizcord/times
 sudo chown "$(whoami)":"$(whoami)"/opt/dizcord/boidbot
 
 # Welcome screen
@@ -318,6 +319,9 @@ fi
 
 # Good, now let's make sure that everything is executable
 sudo chmod ug+x /opt/dizcord/*.sh
+# send start and restart links to home directory
+ln -s /opt/dizcord/restart.sh /home/$(whoami)/restart.sh
+ln -s /opt/dizcord/start.sh /home/$(whoami)/start.sh
 
 if [[ $(ps aux | grep ProjectZomboid64 | grep -v grep | wc -l ) -eq 1 ]]; then
   /opt/dizcord/restart.sh &
@@ -326,6 +330,12 @@ else
   /opt/dizcord/start.sh &
   exit
 fi
+
+# Add MIT license at start
+# OK now we need to reaplce all the gathered info 
+# replace all the webhook placeholders with the actual provided webhook URL
+# replace all the placeholder server names with the user-provided serever name
+
 
 # DISPLAY THE CHOSEN INSTALLATION DIRECTORY, SERVER NAME, WEBHOOK, AND OTP
 whiptail --title "Installation Summary" --msgbox "Installation Directory: $INILOCATION\nServer Name: $SERVER_NAME\nDiscord Webhook: $WEBHOOK\nOTP: $OTP\n\nPress OK to proceed with the installation." 10 60
