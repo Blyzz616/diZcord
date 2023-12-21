@@ -1,12 +1,12 @@
 #!/bin/bash
 
-URL='https://discord.com/api/webhooks/'
+URL='WEBHOOKPLACEHOLDER'
 
 source /opt/dizcord/colours.dec
 
-MESSAGE="**Blighted Dominion** server reanimating now."
+MESSAGE="**HRNAME** server reanimating now."
 
-SRVRINI="blight"
+SRVRINI="ININAME"
 
 date +%s > "/opt/dizcord/times/$SRVRINI-start.time"
 curl -H "Content-Type: application/json" -X POST -d "{\"embeds\": [{ \"color\": \"$BLUE\", \"description\": \"$MESSAGE\" }] }" "$URL"
