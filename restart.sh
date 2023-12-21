@@ -11,7 +11,7 @@ echo "0" > /tmp/dwn.cmd
 
 TIMECALC () {
   #get timestamp from srvr-up.time
-  TIMEUP=$(</opt/dizcord/times/blight.up)
+  TIMEUP=$(</opt/dizcord/times/ININAME.up)
   #calculate up-time
   TIMEDOWN=$(date +%s)
   UPSECS=$(( TIMEDOWN - TIMEUP ))
@@ -62,7 +62,7 @@ SHUTDOWNWARNING(){
     ;;
   esac
 
-  NOTICE="**Rotting Domain** server going down in ***$1 $MINUTE*** for maintenance."
+  NOTICE="**HRNAME** server going down in ***$1 $MINUTE*** for maintenance."
   curl -H "Content-Type: application/json" -X POST -d "{\"embeds\": [{ \"color\": \"$ORANGE\", \"description\": \"$NOTICE\" }] }" "$URL"
 
   sleep $((60*"$1"))
@@ -73,7 +73,7 @@ SHUTDOWNWARNING(){
 SHUTDOWN(){
   TIMECALC
   MESSAGE="The Server was up for $UPTIME"
-  DOWN="**Blighted Dominion** server going down now."
+  DOWN="**HRNAME** server going down now."
   curl -H "Content-Type: application/json" -X POST -d "{\"embeds\": [{ \"color\": \"$RED\", \"title\": \"$DOWN\", \"description\": \"$MESSAGE\" }] }" $URL
 
   screen -S PZ-obit -X stuff "^C"
@@ -95,7 +95,7 @@ SHUTDOWN(){
       screen -S PZ -X stuff "exit^M" # Send 'exit' to screen session PZ
     else
       echo "BP3" >> /tmp/restart.log # Append "BP3" to the restart.log file
-      tail -Fn0 /home/pz1/Zomboid/server-console.txt 2> /dev/null | \
+      tail -Fn0 /home/USERPLACEHOLDER/Zomboid/server-console.txt 2> /dev/null | \
       while read -r line; do # Read each line in the console log
         if [[ -z "$line" ]]; then # If the line is empty it means that the list has completed and we can start processing the CONNECTED variable.
           echo "BP4" >> /tmp/restart.log # Append "BP4" to the restart.log file
@@ -114,7 +114,7 @@ SHUTDOWN(){
   else
     echo "BP6" >> /tmp/restart.log # Append "BP6" to the restart.log file
     screen -S PZ -X stuff "quit^M" # Send 'quit' to screen session PZ
-    tail -Fn0 /home/pz1/Zomboid/server-console.txt 2> /dev/null | \
+    tail -Fn0 /home/USERPLACEHOLDER/Zomboid/server-console.txt 2> /dev/null | \
     while read -r line; do # Read each line in the console log
       echo "BP7" >> /tmp/restart.log # Append "BP7" to the restart.log file
       DOWNSVR=$(echo "$line" | grep -c -E "SSteamSDK: LogOff") # Search for 'SSteamSDK: LogOff' in the line
@@ -140,7 +140,7 @@ SHUTDOWN(){
 PLAYERCHECK(){
   screen -S PZ -X stuff "players ^M"
 
-  tail -Fn0 /home/pz1/Zomboid/server-console.txt 2> /dev/null | \
+  tail -Fn0 /home/USERPLACEHOLDER/Zomboid/server-console.txt 2> /dev/null | \
   while read -r line; do
     EMPTY=$(echo "$line" | grep -o -E "Players connected \([0-9]" | awk -F"(" '{print $NF}')
     if [[ "$EMPTY" -ge 1 ]];
@@ -149,7 +149,7 @@ PLAYERCHECK(){
       break
     elif [[ "$EMPTY" -eq 0 ]];
     then
-      NOTICE="No-one on **Rotting Domain** right now, skipping warnings."
+      NOTICE="No-one on **HRNAME** right now, skipping warnings."
       curl -H "Content-Type: application/json" -X POST -d "{\"embeds\": [{ \"color\": \"$ORANGE\", \"description\": \"$NOTICE\" }] }" "$URL"
       SHUTDOWN
     fi
