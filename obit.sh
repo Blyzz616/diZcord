@@ -5,17 +5,17 @@ OBITFILE=""
 OBITUARY(){
   tail -fn0 "$OBITFILE" | \
   while read -r LINE ; do
-    echo "$LINE" >> /home/pz1/Zomboid/server-console.txt
+    echo "$LINE" >> /home/USERPLACEHOLDER/Zomboid/server-console.txt
 
     # test if the OBIT file is still the current log file
-    if [[ "$OBITFILE" != $(find /home/pz1/Zomboid/Logs/ -maxdepth 1 -name "*user*" | tail -n1) ]]; then
-      OBITFILE="$(find /home/pz1/Zomboid/Logs/ -maxdepth 1 -name '*user*')"
+    if [[ "$OBITFILE" != $(find /home/USERPLACEHOLDER/Zomboid/Logs/ -maxdepth 1 -name "*user*" | tail -n1) ]]; then
+      OBITFILE="$(find /home/USERPLACEHOLDER/Zomboid/Logs/ -maxdepth 1 -name '*user*')"
     fi
   done
 }
 
 VALIDATE() {
-  OBITDIR="/home/pz1/Zomboid/Logs"
+  OBITDIR="/home/USERPLACEHOLDER/Zomboid/Logs"
   OBITPATTERN=".*user.txt"
 
   # Check if a matching file already exists
