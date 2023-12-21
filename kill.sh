@@ -1,6 +1,6 @@
 #!/bin/bash
 
-URL='https://discord.com/api/webhooks/'
+WEBHOOKPLACEHOLDER
 RED=16711680
 ORANGE=16753920
 PLAYERS="Survivors still connected:"
