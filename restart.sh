@@ -1,6 +1,6 @@
 #!/bin/bash
 
-URL='https://discord.com/api/webhooks/'
+URL='WEBHOOKPLACEHOLDER'
 
 # File containing all the colours we use in discord
 source /opt/dizcord/colours.dec
