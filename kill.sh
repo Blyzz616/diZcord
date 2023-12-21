@@ -146,7 +146,7 @@ SRVDN(){
 
 READER(){
   SENT
-  tail -Fn0 /home/pz1/Zomboid/server-console.txt 2> /dev/null | \
+  tail -Fn0 /home/USERPLACEHOLDER/Zomboid/server-console.txt 2> /dev/null | \
   while read -r line ; do
     CONNECTEDNUM=$(echo "$line" | grep -E -o 'connected .[1-9]*' | awk -F"(" '{print $2}')
     echo "CONNECTEDNUM = $CONNECTEDNUM"
