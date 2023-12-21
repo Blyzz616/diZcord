@@ -1,13 +1,13 @@
 #! /bin/bash
 
 # The all-important webhook!
-URL='https://discord.com/api/webhooks/'
+WEBHOOKPLACEHOLDER
 
 # File containing all the colours we use in discord
 source /opt/dizcord/colours.dec
 
 # We're gonna need a lot off files to be present:
-touch /home/pz1/crash.true
+touch /home/USERPLACEHOLDER/crash.true
 
 # Set global variable soth at it's available to all funcitons
 LINE=""
@@ -169,17 +169,17 @@ CHOPPER(){
   fi
 
   if [[ "$EHE_CRASH" = "true" ]]; then
-    touch /home/pz1/crash.true
-    echo "true" > "/home/pz1/crash.true"
+    touch /opt/dizcord/crash.true
+    echo "true" > "/opt/dizcord/crash.true"
     SEED
     MESS_ACTIVE=${RAND_EHE_CRASH[ $RANDOM % ${#RAND_EHE_CRASH[@]} ]}
     curl -H "Content-Type: application/json" -X POST -d "{\"embeds\": [{ \"color\": \"$DISCORDBLUE\", \"title\": \"$TITLE\", \"description\": \"$MESS_ACTIVE\" }] }" $URL
   fi
 
   if [[ -n "$EHE_CRASH_LOG" ]]; then
-    if [[ $(cat /home/pz1/crash.true) = "true" ]]; then
-      touch /home/pz1/crash.log
-      tail -n20 /home/pz1/Zomboid/server-console.txt | grep -B10 -A10 -E "crashing:true" > /home/pz1/crash.log
+    if [[ $(cat /opt/dizcord/crash.true) = "true" ]]; then
+      touch /opt/dizcord/crash.log
+      tail -n20 /home/USERPLACEHOLDER/Zomboid/server-console.txt | grep -B10 -A10 -E "crashing:true" > /home/USERPLACEHOLDER/crash.log
     fi
   fi
 
@@ -207,9 +207,9 @@ CHOPPER(){
         ;;
 
       *)
-        MESS_ROAM="New EHE event- check /home/pz1/newEHE.log"
-        touch /home/pz1/newEHE.log
-        tail -n20 /home/pz1/Zomboid/server-console.txt | grep -B10 -A10 -E 'SCHEDULED-LAUNCH.*id:[a-z_]*' >> /home/pz1/newEHE.log
+        MESS_ROAM="New EHE event- check /home/USERPLACEHOLDER/newEHE.log"
+        touch /home/USERPLACEHOLDER/newEHE.log
+        tail -n20 /home/USERPLACEHOLDER/Zomboid/server-console.txt | grep -B10 -A10 -E 'SCHEDULED-LAUNCH.*id:[a-z_]*' >> /home/USERPLACEHOLDER/newEHE.log
         ;;
     esac
     curl -H "Content-Type: application/json" -X POST -d "{\"embeds\": [{ \"color\": \"$RED\", \"title\": \"$TITLE\", \"description\": \"$MESS_ROAM\" }] }" $URL
@@ -382,7 +382,7 @@ JOIN(){
     TITLE="Access Denied - Check your credentials."
     curl -H "Content-Type: application/json" -X POST -d "{\"embeds\": [{ \"color\": \"$RED\", \"title\": \"$TITLE\" }] }" $URL
     rm /opt/dizcord/playerdb/"$STEAMID".online
-    echo "$(date +%Y-%m-%d\ %H:%M:%S) - Steam user $STEAMNAME ($STEAMLINK) was denied connection" >> /home/pz1/denied.log
+    echo "$(date +%Y-%m-%d\ %H:%M:%S) - Steam user $STEAMNAME ($STEAMLINK) was denied connection" >> /opt/dizcord/playerdb/denied.log
   fi
 }
 
@@ -555,7 +555,7 @@ SHUTDOWN(){
 READER(){
   # Read the output from the SCREEN LOG.
   #tail -Fn0 /tmp/PZ.log 2> /dev/null | \
-  tail -Fn0 /home/pz1/Zomboid/server-console.txt 2> /dev/null | \
+  tail -Fn0 /home/USERPLACEHOLDER/Zomboid/server-console.txt 2> /dev/null | \
   while read -r LINE ; do
 
     # CONNECTION STUFF
@@ -622,7 +622,7 @@ READER(){
 }
 
 INIT(){
-  tail -Fn0 /home/pz1/Zomboid/server-console.txt 2> /dev/null | \
+  tail -Fn0 /home/USERPLACEHOLDER/Zomboid/server-console.txt 2> /dev/null | \
   while read -r LINE ; do
     # SERVER STARTUP STUFF
     SRVRUP=$(echo "$LINE" | grep -E -c "SERVER STARTED")
