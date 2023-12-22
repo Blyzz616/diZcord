@@ -10,10 +10,15 @@ CURRENT_VERSION=$(/opt/dizcord/current.version)
 if [[ $CURRENT_VERSION !=  $LATEST_VERSION ]]; then
   wget -O "/tmp/$LATEST_VERSION.tar.gz" "https://github.com/Blyzz616/diZcord/archive/$LATEST_VERSION.tar.gz"
   tar -zxvf "/tmp/$LATEST_VERSION.tar.gz" -C /tmp
-  cp -r "/tmp/diZcord-$LATEST_VERSION" /opt/dizcord/
+  sudo mkdir -p /opt/dizcord/
+  sudo chown $(whoami):$(whoami) /opt/dizcord
+  cp -r "/tmp/dizcord-$LATEST_VERSION" /opt/dizcord/
   rm "/tmp/$LATEST_VERSION.tar.gz"
   echo "$LATEST_VERSION" > /opt/dizcord/current.version
 fi
+
+sudo chmod ug+x /opt/dizcord/wizard.sh
+sudo /opt/dizcord/wisard.sh &
 
 #if [[ $(ps aux | grep ProjectZomboid64 | grep -v grep | wc -l ) -eq 1 ]]; then
 #  /opt/dizcord/restart.sh &
