@@ -7,11 +7,11 @@ LATEST_VERSION=$(curl -sL https://api.github.com/repos/Blyzz616/diZcord/releases
 CURRENT_VERSION=$(/opt/dizcord/current.version)
 
 # Update if necessary
-if [[ $CURRENT_VERSION !=  $LATEST_VERSION ]]; then
+if [[ "$CURRENT_VERSION" !=  "$LATEST_VERSION" ]]; then
   wget -O "/tmp/$LATEST_VERSION.tar.gz" "https://github.com/Blyzz616/diZcord/archive/$LATEST_VERSION.tar.gz"
   tar -zxvf "/tmp/$LATEST_VERSION.tar.gz" -C /tmp
   sudo mkdir -p /opt/dizcord/
-  sudo chown $(whoami):$(whoami) /opt/dizcord
+  sudo chown "$(whoami)":"$(whoami)" /opt/dizcord
   cp -r "/tmp/dizcord-$LATEST_VERSION" /opt/dizcord/
   rm "/tmp/$LATEST_VERSION.tar.gz"
   echo "$LATEST_VERSION" > /opt/dizcord/current.version
