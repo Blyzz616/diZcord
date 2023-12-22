@@ -18,7 +18,7 @@ if [[ "$CURRENT_VERSION" !=  "$LATEST_VERSION" ]]; then
 fi
 
 sudo chmod ug+x /opt/dizcord/wizard.sh
-sudo /opt/dizcord/wisard.sh &
+sudo /opt/dizcord/wizard.sh &
 
 #if [[ $(ps aux | grep ProjectZomboid64 | grep -v grep | wc -l ) -eq 1 ]]; then
 #  /opt/dizcord/restart.sh &
