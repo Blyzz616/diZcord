@@ -1,11 +1,10 @@
 #!/bin/bash
 
 # Set up directories
+I_AM=$(whoami)
+
 sudo mkdir -p /opt/dizcord/playerdb/html /opt/dizcord/times /opt/dizcord/boidbot
-sudo chown "$(whoami)":"$(whoami)" /opt/dizcord/playerdb 
-sudo chown "$(whoami)":"$(whoami)" /opt/dizcord/playerdb/html
-sudo chown "$(whoami)":"$(whoami)"/opt/dizcord/times
-sudo chown "$(whoami)":"$(whoami)"/opt/dizcord/boidbot
+sudo chown -R "$I_AM":"$I_AM" /opt/dizcord
 
 # Welcome screen
 whiptail --title "Project Zomboid Server Integration" --msgbox "Welcome to the installation wizard.\n\nThis tool will help you integrate your Project Zomboid Server with your Discord server.\n\nYou should already have your Project Zomboid Server set up and running." 10 60
@@ -243,14 +242,14 @@ else
 fi
 
 # Check if there's a restart command in crontab
-if [[ $(sudo grep -c '/opt/dizcord/restart.sh' /var/spool/cron/crontabs/"$(whoami)") -eq 1 ]]; then
+if [[ $(sudo grep -c '/opt/dizcord/restart.sh' /var/spool/cron/crontabs/"$I_AM") -eq 1 ]]; then
   # Get the minute and hour values from the crontab entry
-  MIN=$(sudo grep 'dizcord/restart.sh' /var/spool/cron/crontabs/"$(whoami)" | awk '{printf "%02d", $1}')
+  MIN=$(sudo grep 'dizcord/restart.sh' /var/spool/cron/crontabs/"$I_AM" | awk '{printf "%02d", $1}')
   
   # Check if multiple hours are specified
-  if [[ $(sudo grep 'dizcord/restart.sh' /var/spool/cron/crontabs/"$(whoami)" | awk '{print $2}' | grep -c ",") -gt 0 ]]; then
+  if [[ $(sudo grep 'dizcord/restart.sh' /var/spool/cron/crontabs/"$I_AM" | awk '{print $2}' | grep -c ",") -gt 0 ]]; then
     # Extract and format the restart times
-    HRS=$(sudo grep 'dizcord/restart.sh' /var/spool/cron/crontabs/"$(whoami)" | awk '{printf "%02d", $2}')
+    HRS=$(sudo grep 'dizcord/restart.sh' /var/spool/cron/crontabs/"$I_AM" | awk '{printf "%02d", $2}')
     RESTART_TIMES=$(echo $HRS | awk -v MIN="$MIN" -F, '{for(i=1; i<=NF; i++) {printf "%02d:%s\n", $i, MIN}}')
     
     # Ask the user if they want to keep the existing cron schedule
@@ -435,8 +434,7 @@ fi
 
 # Lets replace all the placeholders with their correct values
 # replace home directory name
-USERHOOK="$(whoami)"
-sed -i "s/USERPLACEHOLDER/$USERHOOK/g" /opt/dizcord/*
+sed -i "s/USERPLACEHOLDER/"$I_AM"/g" /opt/dizcord/*
 # replace webhooks
 sed -i 's/WEBHOOKPLACEHOLDER/$WEBHOOK/g' /opt/dizcord/*
 # replace human readable server name
@@ -448,8 +446,8 @@ sed -i 's/ININAME/$ININAME/' /opt/dizcord/*
 # Good, now let's make sure that everything is executable
 sudo chmod ug+x /opt/dizcord/*.sh
 # send start and restart links to home directory
-ln -s /opt/dizcord/restart.sh /home/"$(whoami)"/restart.sh
-ln -s /opt/dizcord/start.sh /home/"$(whoami)"/start.sh
+ln -s /opt/dizcord/restart.sh /home/"$I_AM"/restart.sh
+ln -s /opt/dizcord/start.sh /home/"$I_AM"/start.sh
 
 whiptail --title "Thanks for using dizcord." --msgbox "
 Maybe consider a small donation?\n\
