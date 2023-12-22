@@ -436,7 +436,7 @@ fi
 # Lets replace all the placeholders with their correct values
 # replace home directory name
 USERHOOK="$(whoami)"
-sed -i 's/USERPLACEHOLDER/$USERHOOK/g' /opt/dizcord/*
+sed -i "s/USERPLACEHOLDER/$USERHOOK/g" /opt/dizcord/*
 # replace webhooks
 sed -i 's/WEBHOOKPLACEHOLDER/$WEBHOOK/g' /opt/dizcord/*
 # replace human readable server name
