@@ -10,46 +10,162 @@ sudo chown "$(whoami)":"$(whoami)"/opt/dizcord/boidbot
 # Welcome screen
 whiptail --title "Project Zomboid Server Integration" --msgbox "Welcome to the installation wizard.\n\nThis tool will help you integrate your Project Zomboid Server with your Discord server.\n\nYou should already have your Project Zomboid Server set up and running." 10 60
 
-# Check for server config file (...../Zomboid/Server/<somename>.ini)
-RESULTS=$(find / -type f -path "*/Zomboid/Server/*.ini" 2>/dev/null)
-INIFILE=$(find / -type f -path "*/Zomboid/Server/*.ini" 2>/dev/null | awk -F"/" '{print $NF}')
+# License
+LICENSE_TEXT="
+GNU General Public License v3.0\n\
+\n\
+Copyright (c) 2023 Jim Sher\n\
+\n\
+This program is free software: you can redistribute it and/or modify\n\
+it under the terms of the GNU General Public License as published by\n\
+the Free Software Foundation\n\
+\n\
+This program is distributed in the hope that it will be useful,\n\
+but WITHOUT ANY WARRANTY; without even the implied warranty of\n\
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the\n\
+GNU General Public License for more details.\n\
+\n\
+You should have received a copy of the GNU General Public License\n\
+along with this program. If not, see <https://www.gnu.org/licenses/>.\n\
+\n\
+By selecting \"Yes\" you agree to the above
+"
 
-if [ "${#RESULTS[@]}" -eq 0 ]; then
-  # Ask for installation directory if servername.ini is not found
-  INILOCATION=$(whiptail --inputbox "I could not find the Project Zomboid installation. Please enter the full path to the .INI file for your Project Zomboid Server:" 10 60 3>&1 1>&2 2>&3)
+if whiptail --title "GNU GPL v3 License" --yesno "$LICENSE_TEXT" 26 78; then
+  touch /opt/discord/licence.txt
+  echo -e "GNU General Public License v3.0
+  
+Copyright (c) 2023 Jim Sher
 
-  # Validate the directory
-  if [ -z "$INILOCATION" ]; then
-    # If the installation directory is empty, show an error and exit
-    whiptail --title "Error" --msgbox "Installation directory cannot be empty. Exiting." 10 60
-    exit 1
-  fi
-elif [ "${#RESULTS[@]}" -eq 1 ]; then
-  # Display the single result and ask for confirmation
-  INIFILE="${RESULTS[0]}"
-  whiptail --title "Confirm Config File" --yesno "I found a Project Zomboid configuration file called $INIFILE.\n\nIs this the correct config file from your server?" 10 60
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation
 
-  # Check the user's choice
-  if [ $? -eq 0 ]; then
-    # If the user confirms, set INILOCATION to the found directory
-    INILOCATION="$PARENT_DIR"
-  else
-    # Ask the user to manually enter the installation directory
-    INILOCATION=$(whiptail --inputbox "Please enter the full path to the .INI file for Project Zomboid (including the file itself):" 10 60 3>&1 1>&2 2>&3)
-  fi
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>." > /opt/dizcord/licence.txt
 else
-  # Display a list of INI files and ask the user to choose
-  OPTIONS=()
-  for ((i = 0; i < ${#RESULTS[@]}; i++)); do
-    PARENT_DIR=$(dirname "${RESULTS[i]}")
-    OPTIONS+=("$i" "$PARENT_DIR")
-  done
-
-  SELECTED_INDEX=$(whiptail --title "Select Installation Directory" --menu "Please select the correct installation directory:" 20 60 10 "${OPTIONS[@]}" 3>&1 1>&2 2>&3)
-
-  # Set the installation directory to the user's choice
-  INILOCATION="${RESULTS[SELECTED_INDEX]}"
+  exit
 fi
+
+# FIND THE INI FILES
+# Function to check if a file exists
+file_exists() {
+    [ -e "$1" ]
+}
+
+# Function to display a dialog and get user input
+GET_USER_INPUT() {
+    whiptail --inputbox "$1" 8 60 --title "$2" 3>&1 1>&2 2>&3
+}
+
+# Function to display a dialog and get user confirmation (yes/no)
+GET_USER_CONFIRMATION() {
+    whiptail --yesno "$1" 8 60 --title "$2" 3>&1 1>&2 2>&3
+}
+
+# Function to display a list dialog and get user selection
+GET_USER_SELECTION() {
+    whiptail --menu "$1" 20 60 10 "${@:3}" 3>&1 1>&2 2>&3
+}
+
+# Function to find files based on the provided pattern
+FIND_FILES() {
+    find / -type f -path "*/Zomboid/Server/*.ini" 2>/dev/null
+}
+
+# Check if the file exists
+FILE_PATH=""
+while true; do
+    FILES=$(FIND_FILES)
+    FILE_COUNT=$(echo "$FILES" | wc -l)
+
+    if [ "$FILE_COUNT" -eq 0 ]; then
+        # File not found, ask user for full path
+        FILE_PATH=$(GET_USER_INPUT "Enter the full path to the file:" "File Not Found")
+    elif [ "$FILE_COUNT" -eq 1 ]; then
+        # One file found, ask if it's correct
+        FILE_PATH=$(echo "$FILES" | head -n 1)
+        if ! GET_USER_CONFIRMATION "Is this the correct file?\n$FILE_PATH" "File Confirmation"; then
+            FILE_PATH=""
+        fi
+    else
+        # Multiple files found, ask user to select
+        FILE_PATHS_ARRAY=("$FILES")
+        PATH_OPTIONS=()
+        for path in "${FILE_PATHS_ARRAY[@]}"; do
+            PATH_OPTIONS+=("$path" "")
+        done
+
+        selected_path=$(GET_USER_SELECTION "Select the correct path:" "Path Selection" "${PATH_OPTIONS[@]}")
+
+        # Check if there is only one file in the selected path
+        SELECTED_FILES=($(echo "$FILES" | grep "$selected_path"))
+        if [ "${#SELECTED_FILES[@]}" -eq 1 ]; then
+            FILE_PATH=${SELECTED_FILES[0]}
+            if ! GET_USER_CONFIRMATION "Is this the correct file?\n$FILE_PATH" "File Confirmation"; then
+                FILE_PATH=""
+            fi
+        else
+            # Multiple files in the selected path, ask user to choose
+            FILE_OPTIONS=()
+            for FILE in "${SELECTED_FILES[@]}"; do
+                FILE_OPTIONS+=("$FILE" "")
+            done
+            FILE_PATH=$(GET_USER_SELECTION "Select the correct file:" "File Selection" "${FILE_OPTIONS[@]}")
+        fi
+    fi
+
+done
+
+# Break down the path/file to get server start name
+ININAME=$(echo "$FILE_PATH" | awk -F"/" '{print $NF}' | rev | cut -c5- | rev)
+touch /opt/dizcord/ini.name
+echo "$ININAME" > /opt/dizcord/ini.name
+
+# INIFILE=$(find / -type f -path "*/Zomboid/Server/*.ini" 2>/dev/null | awk -F"/" '{print $NF}')
+
+# if [ "${#INIFILE[@]}" -eq 0 ]; then
+#   # Ask for installation directory if servername.ini is not found
+#   INILOCATION=$(whiptail --inputbox "I could not find the Project Zomboid installation. Please enter the full path to the .INI file for your Project Zomboid Server:" 10 60 3>&1 1>&2 2>&3)
+
+#   # Validate the directory
+#   if [ -z "$INILOCATION" ]; then
+#     # If the installation directory is empty, show an error and exit
+#     whiptail --title "Error" --msgbox "Installation directory cannot be empty. Exiting." 10 60
+#     exit 1
+#   fi
+# elif [ "${#INIFILE[@]}" -eq 1 ]; then
+#   # Display the single result and ask for confirmation
+#   whiptail --title "Confirm Config File" --yesno "I found a Project Zomboid configuration file called $INIFILE.\n\nIs this the correct config file from your server?" 10 60
+
+#   # Check the user's choice
+#   if [ $? -eq 0 ]; then
+#     # If the user confirms, set INIFILE to the found directory
+#     INILOCATION="$(echo $INIFILE | awk -F"/" '{$NF=""}1' | sed -e 's/ /\//g')"
+#   else
+#     # Ask the user to manually enter the installation directory
+#     INILOCATION=$(whiptail --inputbox "Please enter the full path to the .INI file for Project Zomboid (including the file itself):" 10 60 3>&1 1>&2 2>&3)
+#   fi
+# else
+#   # Display a list of INI files and ask the user to choose
+#   OPTIONS=()
+#   for ((i = 0; i < ${#INIFILE[@]}; i++)); do
+#     PARENT_DIR=$(dirname "${RESULTS[i]}")
+#     OPTIONS+=("$i" "$PARENT_DIR")
+#   done
+
+#   SELECTED_INDEX=$(whiptail --title "Select Installation Directory" --menu "Please select the correct installation directory:" 20 60 10 "${OPTIONS[@]}" 3>&1 1>&2 2>&3)
+
+#   # Set the installation directory to the user's choice
+#   INILOCATION="${RESULTS[SELECTED_INDEX]}"
+# fi
+
+# Use "$FILE_PATH" to get the path to the server INI file.
 
 # Ask the user to enter a server name
 SERVER_NAME=""
@@ -127,14 +243,14 @@ else
 fi
 
 # Check if there's a restart command in crontab
-if [[ $(sudo grep -c '/opt/dizcord/restart.sh' /var/spool/cron/crontabs/$(whoami)) -eq 1 ]]; then
+if [[ $(sudo grep -c '/opt/dizcord/restart.sh' /var/spool/cron/crontabs/"$(whoami)") -eq 1 ]]; then
   # Get the minute and hour values from the crontab entry
-  MIN=$(sudo grep 'dizcord/restart.sh' /var/spool/cron/crontabs/$(whoami) | awk '{printf "%02d", $1}')
+  MIN=$(sudo grep 'dizcord/restart.sh' /var/spool/cron/crontabs/"$(whoami)" | awk '{printf "%02d", $1}')
   
   # Check if multiple hours are specified
-  if [[ $(sudo grep 'dizcord/restart.sh' /var/spool/cron/crontabs/$(whoami) | awk '{print $2}' | grep -c ",") -gt 0 ]]; then
+  if [[ $(sudo grep 'dizcord/restart.sh' /var/spool/cron/crontabs/"$(whoami)" | awk '{print $2}' | grep -c ",") -gt 0 ]]; then
     # Extract and format the restart times
-    HRS=$(sudo grep 'dizcord/restart.sh' /var/spool/cron/crontabs/$(whoami) | awk '{printf "%02d", $2}')
+    HRS=$(sudo grep 'dizcord/restart.sh' /var/spool/cron/crontabs/"$(whoami)" | awk '{printf "%02d", $2}')
     RESTART_TIMES=$(echo $HRS | awk -v MIN="$MIN" -F, '{for(i=1; i<=NF; i++) {printf "%02d:%s\n", $i, MIN}}')
     
     # Ask the user if they want to keep the existing cron schedule
@@ -308,7 +424,7 @@ LATEST_VERSION=$(curl -sL https://api.github.com/repos/Blyzz616/diZcord/releases
 CURRENT_VERSION=$(< /opt/dizcord/current.version)
 
 # Update if necessary
-if [[ $CURRENT_VERSION !=  $LATEST_VERSION ]]; then
+if [[ "$CURRENT_VERSION" !=  "$LATEST_VERSION" ]]; then
   wget -O "/tmp/$LATEST_VERSION.tar.gz" "https://github.com/Blyzz616/diZcord/archive/$LATEST_VERSION.tar.gz"
   tar -zxvf "/tmp/$LATEST_VERSION.tar.gz" -C /tmp
   mv "/tmp/diZcord-${LATEST_VERSION#v}/"* /opt/dizcord/
@@ -317,11 +433,43 @@ if [[ $CURRENT_VERSION !=  $LATEST_VERSION ]]; then
   echo "$LATEST_VERSION" > /opt/dizcord/current.version
 fi
 
+# Lets replace all the placeholders with their correct values
+# replace home directory name
+USERHOOK="$(whoami)"
+sed -i 's/USERPLACEHOLDER/$USERHOOK/g' /opt/dizcord/*
+# replace webhooks
+sed -i 's/WEBHOOKPLACEHOLDER/$WEBHOOK/g' /opt/dizcord/*
+# replace human readable server name
+sed -i 's/HRNAME/$SERVER_NAME/g' /opt/dizcord/*
+# replace the server-start name
+sed -i 's/ININAME/$ININAME/' /opt/dizcord/*
+
+
 # Good, now let's make sure that everything is executable
 sudo chmod ug+x /opt/dizcord/*.sh
 # send start and restart links to home directory
-ln -s /opt/dizcord/restart.sh /home/$(whoami)/restart.sh
-ln -s /opt/dizcord/start.sh /home/$(whoami)/start.sh
+ln -s /opt/dizcord/restart.sh /home/"$(whoami)"/restart.sh
+ln -s /opt/dizcord/start.sh /home/"$(whoami)"/start.sh
+
+whiptail --title "Thanks for using dizcord." --msgbox "
+Maybe consider a small donation?\n\
+\n\
+█▀▀▀▀▀█ ▀▄█▄██  ▄ █▀▀▀▀▀█\n\
+█ ███ █ ███ ▄██   █ ███ █\n\
+█ ▀▀▀ █ ▀ ▄█▀ ▀▀▀ █ ▀▀▀ █\n\
+▀▀▀▀▀▀▀ ▀ █ █ █▄█ ▀▀▀▀▀▀▀\n\
+▀█▀█▄▄▀▄█ █▀█▄▀▀█▀ ▄▀▀▀▄▀\n\
+ █ ▀▄ ▀▀▄██▀▀▄ ▄█▄██▄▄▄  \n\
+▀██ ▄█▀▄▄█▀▄██▀█▄▄█▄█ ▀▀█\n\
+▄▀▄ █▀▀█ ▄▀█ ▀▄ ███▄█ ▀▀▄\n\
+  ▀▀▀▀▀ ██▀ ▀▀▄▀█▀▀▀█▀█▀█\n\
+█▀▀▀▀▀█   ▀▄ ▀▄ █ ▀ █ ▀▀█\n\
+█ ███ █ ▄▀▄  ▄█ ▀██▀██▄█▄\n\
+█ ▀▀▀ █ █ ▀▄▄█▀ ▀█▀ █ █▀ \n\
+▀▀▀▀▀▀▀ ▀▀▀▀▀      ▀▀▀▀▀▀\n\
+\n\
+The QR Code goes to my Ko-fi site" 24 78
+
 
 if [[ $(ps aux | grep ProjectZomboid64 | grep -v grep | wc -l ) -eq 1 ]]; then
   /opt/dizcord/restart.sh &
@@ -331,13 +479,5 @@ else
   exit
 fi
 
-# Add MIT license at start
-# OK now we need to reaplce all the gathered info 
-# replace all the webhook placeholders with the actual provided webhook URL
-# replace all the placeholder server names with the user-provided serever name
-
-
 # DISPLAY THE CHOSEN INSTALLATION DIRECTORY, SERVER NAME, WEBHOOK, AND OTP
-whiptail --title "Installation Summary" --msgbox "Installation Directory: $INILOCATION\nServer Name: $SERVER_NAME\nDiscord Webhook: $WEBHOOK\nOTP: $OTP\n\nPress OK to proceed with the installation." 10 60
-
-# TO DO Finish it up - make it workable
+#whiptail --title "Installation Summary" --msgbox "Installation Directory: $INILOCATION\nServer Name: $SERVER_NAME\nDiscord Webhook: $WEBHOOK\nOTP: $OTP\n\nPress OK to proceed with the installation." 10 60
