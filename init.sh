@@ -4,10 +4,10 @@
 LATEST_VERSION=$(curl -sL https://api.github.com/repos/Blyzz616/diZcord/releases/latest | jq -r '.tag_name')
 
 # Get current version
-CURRENT_VERSION=$(/opt/dizcord/current.version)
+CURRENT_VERSION=$(sudo cat /opt/dizcord/current.version)
 
 # get current user name
-I_AM="($whoami)"
+I_AM=($whoami)
 
 # Update if necessary
 if [[ "$CURRENT_VERSION" !=  "$LATEST_VERSION" ]]; then
