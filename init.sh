@@ -20,11 +20,3 @@ fi
 
 sudo chmod ug+x /opt/dizcord/wizard.sh
 sudo /opt/dizcord/wizard.sh &
-
-#if [[ $(ps aux | grep ProjectZomboid64 | grep -v grep | wc -l ) -eq 1 ]]; then
-#  /opt/dizcord/restart.sh &
-#  exit
-#else
-#  /opt/dizcord/start.sh &
-#  exit
-#fi
