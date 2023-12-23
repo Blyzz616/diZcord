@@ -1,13 +1,15 @@
 #!/bin/bash
 
+# Global variables
+STARTINI=()
+
 # Set up directories
 I_AM=$(whoami)
-
 sudo mkdir -p /opt/dizcord/playerdb/html /opt/dizcord/times /opt/dizcord/boidbot
 sudo chown -R "$I_AM":"$I_AM" /opt/dizcord
 
 # Welcome screen
-whiptail --title "Project Zomboid Server Integration" --msgbox "Welcome to the installation wizard.\n\nThis tool will help you integrate your Project Zomboid Server with your Discord server.\n\nYou should already have your Project Zomboid Server set up and running." 10 60
+whiptail --title "Project Zomboid Server Integration" --msgbox "Welcome to the installation wizard.\n\nThis tool will help you integrate your Project Zomboid Server with your Discord server.\n\nYou should already have your Project Zomboid Server set up and running." 16 80
 
 # License
 LICENSE_TEXT="
@@ -30,9 +32,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.\n\
 By selecting \"Yes\" you agree to the above
 "
 
-if whiptail --title "GNU GPL v3 License" --yesno "$LICENSE_TEXT" 26 78; then
-  touch /opt/dizcord/licence.txt
-  echo -e "GNU General Public License v3.0
+if whiptail --title "GNU GPL v3 License" --yesno "$LICENSE_TEXT" 26 80; then
+  sudo touch /opt/dizcord/licence.txt
+  sudo echo -e "GNU General Public License v3.0
   
 Copyright (c) 2023 Jim Sher
 
@@ -52,119 +54,49 @@ else
 fi
 
 # FIND THE INI FILES
-# Function to check if a file exists
-file_exists() {
-    [ -e "$1" ]
-}
+INIARR=()
+while IFS=  read -r -d $'\0'; do
+    INIARR+=("$REPLY" "")
+done < <(find / -type f -path "*/Zomboid/Server/*.ini" -print0 2>/dev/null)
 
-# Function to display a dialog and get user input
-GET_USER_INPUT() {
-    whiptail --inputbox "$1" 8 60 --title "$2" 3>&1 1>&2 2>&3
-}
+# to get a full list of the items in that array run the following command:
+# echo "${INIARR[@]}"
 
-# Function to display a dialog and get user confirmation (yes/no)
-GET_USER_CONFIRMATION() {
-    whiptail --yesno "$1" 8 60 --title "$2" 3>&1 1>&2 2>&3
-}
+if [ "${#INIARR[@]}" -eq 0 ]; then
+  # Ask for installation directory if servername.ini is not found
+  INILOCATION=$(whiptail --inputbox "I could not find the Project Zomboid installation. Please enter the full path to the .INI file for your Project Zomboid Server:" 10 80 3>&1 1>&2 2>&3)
 
-# Function to display a list dialog and get user selection
-GET_USER_SELECTION() {
-    whiptail --menu "$1" 20 60 10 "${@:3}" 3>&1 1>&2 2>&3
-}
+  # Validate the directory
+  if [ -z "$INILOCATION" ]; then
+    # If the installation directory is empty, show an error and exit
+    whiptail --title "Error" --msgbox "Installation directory cannot be empty. Exiting." 10 80
+    exit 1
+  fi
+elif [ "${#INIARR[@]}" -eq 1 ]; then
+  # Display the single result and ask for confirmation
+  whiptail --title "Confirm Config File" --yesno "I found a Project Zomboid configuration file called $INIARR.\n\nIs this the correct config file from your server?" 10 80
 
-# Function to find files based on the provided pattern
-FIND_FILES() {
-    find / -type f -path "*/Zomboid/Server/*.ini" 2>/dev/null
-}
-
-# Check if the file exists
-FILE_PATH=""
-while true; do
-    FILES=$(FIND_FILES)
-    FILE_COUNT=$(echo "$FILES" | wc -l)
-
-    if [ "$FILE_COUNT" -eq 0 ]; then
-        # File not found, ask user for full path
-        FILE_PATH=$(GET_USER_INPUT "Enter the full path to the file:" "File Not Found")
-    elif [ "$FILE_COUNT" -eq 1 ]; then
-        # One file found, ask if it's correct
-        FILE_PATH=$(echo "$FILES" | head -n 1)
-        if ! GET_USER_CONFIRMATION "Is this the correct file?\n$FILE_PATH" "File Confirmation"; then
-            FILE_PATH=""
-        fi
-    else
-        # Multiple files found, ask user to select
-        FILE_PATHS_ARRAY=("$FILES")
-        PATH_OPTIONS=()
-        for path in "${FILE_PATHS_ARRAY[@]}"; do
-            PATH_OPTIONS+=("$path" "")
-        done
-
-        selected_path=$(GET_USER_SELECTION "Select the correct path:" "Path Selection" "${PATH_OPTIONS[@]}")
-
-        # Check if there is only one file in the selected path
-        SELECTED_FILES=($(echo "$FILES" | grep "$selected_path"))
-        if [ "${#SELECTED_FILES[@]}" -eq 1 ]; then
-            FILE_PATH=${SELECTED_FILES[0]}
-            if ! GET_USER_CONFIRMATION "Is this the correct file?\n$FILE_PATH" "File Confirmation"; then
-                FILE_PATH=""
-            fi
-        else
-            # Multiple files in the selected path, ask user to choose
-            FILE_OPTIONS=()
-            for FILE in "${SELECTED_FILES[@]}"; do
-                FILE_OPTIONS+=("$FILE" "")
-            done
-            FILE_PATH=$(GET_USER_SELECTION "Select the correct file:" "File Selection" "${FILE_OPTIONS[@]}")
-        fi
-    fi
-
-done
-
-# Break down the path/file to get server start name
-ININAME=$(echo "$FILE_PATH" | awk -F"/" '{print $NF}' | rev | cut -c5- | rev)
-touch /opt/dizcord/ini.name
-echo "$ININAME" > /opt/dizcord/ini.name
-
-# INIFILE=$(find / -type f -path "*/Zomboid/Server/*.ini" 2>/dev/null | awk -F"/" '{print $NF}')
-
-# if [ "${#INIFILE[@]}" -eq 0 ]; then
-#   # Ask for installation directory if servername.ini is not found
-#   INILOCATION=$(whiptail --inputbox "I could not find the Project Zomboid installation. Please enter the full path to the .INI file for your Project Zomboid Server:" 10 60 3>&1 1>&2 2>&3)
-
-#   # Validate the directory
-#   if [ -z "$INILOCATION" ]; then
-#     # If the installation directory is empty, show an error and exit
-#     whiptail --title "Error" --msgbox "Installation directory cannot be empty. Exiting." 10 60
-#     exit 1
-#   fi
-# elif [ "${#INIFILE[@]}" -eq 1 ]; then
-#   # Display the single result and ask for confirmation
-#   whiptail --title "Confirm Config File" --yesno "I found a Project Zomboid configuration file called $INIFILE.\n\nIs this the correct config file from your server?" 10 60
-
-#   # Check the user's choice
-#   if [ $? -eq 0 ]; then
-#     # If the user confirms, set INIFILE to the found directory
-#     INILOCATION="$(echo $INIFILE | awk -F"/" '{$NF=""}1' | sed -e 's/ /\//g')"
-#   else
-#     # Ask the user to manually enter the installation directory
-#     INILOCATION=$(whiptail --inputbox "Please enter the full path to the .INI file for Project Zomboid (including the file itself):" 10 60 3>&1 1>&2 2>&3)
-#   fi
-# else
-#   # Display a list of INI files and ask the user to choose
-#   OPTIONS=()
-#   for ((i = 0; i < ${#INIFILE[@]}; i++)); do
-#     PARENT_DIR=$(dirname "${RESULTS[i]}")
-#     OPTIONS+=("$i" "$PARENT_DIR")
-#   done
-
-#   SELECTED_INDEX=$(whiptail --title "Select Installation Directory" --menu "Please select the correct installation directory:" 20 60 10 "${OPTIONS[@]}" 3>&1 1>&2 2>&3)
-
-#   # Set the installation directory to the user's choice
-#   INILOCATION="${RESULTS[SELECTED_INDEX]}"
-# fi
-
-# Use "$FILE_PATH" to get the path to the server INI file.
+  # Check the user's choice
+  if [ $? -eq 0 ]; then
+    # If the user confirms, set INIFILE to the found directory
+    INILOCATION="$(echo $INIARR | awk -F"/" '{$NF=""}1' | sed -e 's/ /\//g')"
+  else
+    # Ask the user to manually enter the installation directory
+    INILOCATION=$(whiptail --inputbox "Please enter the full path to the .INI file for Project Zomboid (including the file itself):" 10 80 3>&1 1>&2 2>&3)
+  fi
+else
+  # give a list of found INI files to the user and ask them which one they want to use.
+  INIARR=()
+  while IFS=  read -r -d $'\0'; do
+    INIARR+=("$REPLY" "")
+  done < <(find / -type f -path "*/Zomboid/Server/*.ini" -print0 2>/dev/null)
+  SELINI=()
+  for ((i = 0; i < ${#INIARR[@]}; i+=2)); do
+    SELINI+=( "${INIARR[i]}" "${INIARR[i+1]}" off )
+  done
+  INIFILE=$(whiptail --title "Select the correct INI file" --radiolist "Please select the correct installation directory:" 20 80 "${#SELINI[@]}" "${SELINI[@]}" 3>&1 1>&2 2>&3)
+  STARTINI=$(echo $SELECTEDINI | awk -F "/" '{print $NF}' | rev | cut -c5- | rev)
+fi
 
 # Ask the user to enter a server name
 SERVER_NAME=""
@@ -173,7 +105,7 @@ SERVER_NAME=""
 ASK(){
   GENERATED_NAMES=0
   # Prompt the user to enter a server name
-  SERVER_NAME=$(whiptail --title "Server Name" --inputbox "Please enter a server name for your Project Zomboid server.\n\nIf left blank, a random name will be generated." 12 60 3>&1 1>&2 2>&3)
+  SERVER_NAME=$(whiptail --title "Server Name" --inputbox "Please enter a server name for your Project Zomboid server.\n\nIf left blank, a random name will be generated." 12 80 3>&1 1>&2 2>&3)
 
   # Check if the entered server name is empty
   if [[ -z "$SERVER_NAME" ]]; then
@@ -190,7 +122,7 @@ SUGGEST(){
       RANDOM_SERVER_NAME=$(shuf -n 1 -e "Zombocalypse Haven" "Undead Utopia" "Survival Sanctuary" "Outbreak Outpost" "Infected Inn" "Apocalypse Alcove" "Cataclysmic Citadel" "Quarantine Quarter" "Endgame Enclave" "Deadzone Dwelling" "Survival Stronghold" "Pandemic Playground" "Aftermath Asylum" "Undying Utopia" "Blighted Dominion|" "Rotting Domain")
 
       # Ask the user if the generated name is acceptable
-      whiptail --title "Generated Name" --yesno "Generated Server Name: $RANDOM_SERVER_NAME\n\nIs this name acceptable?" 10 60
+      whiptail --title "Generated Name" --yesno "Generated Server Name: $RANDOM_SERVER_NAME\n\nIs this name acceptable?" 10 80
 
       # If the user accepts, set SERVER_NAME and exit the function
       if [ $? -eq 0 ]; then
@@ -211,7 +143,7 @@ ASK
 # Prompt the user for the Discord server's webhook
 WEBHOOK=""
 while [ -z "$WEBHOOK" ]; do
-  WEBHOOK=$(whiptail --title "Discord Webhook" --inputbox "Please enter the Discord server's webhook:" 12 60 "https://discord.com/api/webhooks/" 3>&1 1>&2 2>&3)
+  WEBHOOK=$(whiptail --title "Discord Webhook" --inputbox "Please enter the Discord server's webhook:" 12 80 "https://discord.com/api/webhooks/" 3>&1 1>&2 2>&3)
 done
 
 # Generate a random 6-digit number and save it to the variable OTP
@@ -224,7 +156,7 @@ zard:\n\n$OTP\" }] }" "$WEBHOOK"
 # Prompt the user for the 6-digit number sent to Discord
 USER_INPUT=""
 while [ "$USER_INPUT" != "$OTP" ]; do
-  USER_INPUT=$(whiptail --title "Verification Code" --inputbox "Please enter the 6-digit verification code sent to Discord:" 12 60 3>&1 1>&2 2>&3)
+  USER_INPUT=$(whiptail --title "Verification Code" --inputbox "Please enter the 6-digit verification code sent to Discord:" 12 80 3>&1 1>&2 2>&3)
   # Check if the user clicked "Cancel" and exit the script
   if [ $? -ne 0 ]; then
     exit
@@ -232,7 +164,7 @@ while [ "$USER_INPUT" != "$OTP" ]; do
 done
 
 # Ask the user if they want the server to restart on reboot using whiptail
-RESTARTONREBOOT=$(whiptail --yesno "Do you want the server to restart on reboot?" 10 60)
+RESTARTONREBOOT=$(whiptail --yesno "Do you want the server to restart on reboot?" 10 80)
 
 if [[ "$RESTARTONREBOOT" = 0 ]];then
   CRONINS="@reboot /opt/dizcord/start.sh"
@@ -253,11 +185,11 @@ if [[ $(sudo grep -c '/opt/dizcord/restart.sh' /var/spool/cron/crontabs/"$I_AM")
     RESTART_TIMES=$(echo $HRS | awk -v MIN="$MIN" -F, '{for(i=1; i<=NF; i++) {printf "%02d:%s\n", $i, MIN}}')
     
     # Ask the user if they want to keep the existing cron schedule
-    KEEPCRON=$(whiptail --title "Cronjob Times" --yesno "The Project Zomboid Server is currently configured to restart at these times:\n\n$RESTART_TIMES\n\nDo you want to keep these times?" 15 60)
+    KEEPCRON=$(whiptail --title "Cronjob Times" --yesno "The Project Zomboid Server is currently configured to restart at these times:\n\n$RESTART_TIMES\n\nDo you want to keep these times?" 15 80)
     
     if [[ $KEEPCRON -ne 0 ]]; then # If the user wants to remove/change the times
       # Ask the user if they want to remove or change the schedule
-      ALTERCRON=$(whiptail --title "Remove or Change" --menu "What would you prefer to do?" 15 60 2 \
+      ALTERCRON=$(whiptail --title "Remove or Change" --menu "What would you prefer to do?" 15 80 2 \
         "1" "Remove the scheduled restart entirely." \
         "2" "Change the times" \
         3>&1 1>&2 2>&3)
@@ -266,24 +198,24 @@ if [[ $(sudo grep -c '/opt/dizcord/restart.sh' /var/spool/cron/crontabs/"$I_AM")
         1)
           # Remove the scheduled restart from crontab
           crontab -l | grep -v '/opt/dizcord/restart.sh' | crontab -
-          whiptail --title "Scheduling removed" --msgbox "The scheduled server restart has been removed." 8 78
+          whiptail --title "Scheduling removed" --msgbox "The scheduled server restart has been removed." 8 80
           ;;
 
         2)
           # Ask the user how many times a day they want to restart the server (options: 0, 1, 2, 3, 4)
-          RESTART_FREQUENCY=$(whiptail --title "Restart Frequency" --menu "How many times a day do you want to restart the server?" 15 60 5 "0" "No automatic restart" "1" "Once a day" "2" "Every 12 hours" "3" "Every 8 hours" "4" "Every 6 hours" 3>&1 1>&2 2>&3)
+          RESTART_FREQUENCY=$(whiptail --title "Restart Frequency" --menu "How many times a day do you want to restart the server?" 15 80 5 "0" "No automatic restart" "1" "Once a day" "2" "Every 12 hours" "3" "Every 8 hours" "4" "Every 6 hours" 3>&1 1>&2 2>&3)
 
           case $RESTART_FREQUENCY in
             1)
               # Validate and ask the user to enter a valid time using whiptail
               while true; do
-                RESTART_TIME=$(whiptail --title "Restart Time" --inputbox "Enter the restart time (24-hour format, e.g., 13:30):" 10 60 3>&1 1>&2 2>&3)
+                RESTART_TIME=$(whiptail --title "Restart Time" --inputbox "Enter the restart time (24-hour format, e.g., 13:30):" 10 80 3>&1 1>&2 2>&3)
                 
                 # Validate the time format (24-hour format)
                 if [[ "$RESTART_TIME" =~ ^([01][0-9]|2[0-3]):[0-5][0-9]$ ]]; then
                   break
                 else
-                  whiptail --title "Invalid Time" --msgbox "Please enter a valid time in 24-hour format (e.g., 13:30)." 10 60
+                  whiptail --title "Invalid Time" --msgbox "Please enter a valid time in 24-hour format (e.g., 13:30)." 10 80
                 fi
               done
               CRONMIN=$(echo "$RESTART_TIME" | awk -F":" '{print $2}' | sed 's/^0*//')
@@ -298,13 +230,13 @@ if [[ $(sudo grep -c '/opt/dizcord/restart.sh' /var/spool/cron/crontabs/"$I_AM")
             2)
               # Validate and ask the user to enter a valid time using whiptail
               while true; do
-                RESTART_TIME1=$(whiptail --title "Restart Time" --inputbox "Enter first restart time (24-hour format, e.g., 13:30):" 10 60 3>&1 1>&2 2>&3)
+                RESTART_TIME1=$(whiptail --title "Restart Time" --inputbox "Enter first restart time (24-hour format, e.g., 13:30):" 10 80 3>&1 1>&2 2>&3)
                 
                 # Validate the time format (24-hour format)
                 if [[ "$RESTART_TIME1" =~ ^([01][0-9]|2[0-3]):[0-5][0-9]$ ]]; then
                   break
                 else
-                  whiptail --title "Invalid Time" --msgbox "Please enter a valid time in 24-hour format (e.g., 13:30)." 10 60
+                  whiptail --title "Invalid Time" --msgbox "Please enter a valid time in 24-hour format (e.g., 13:30)." 10 80
                 fi
               done
               
@@ -331,13 +263,13 @@ if [[ $(sudo grep -c '/opt/dizcord/restart.sh' /var/spool/cron/crontabs/"$I_AM")
             3)
               # Validate and ask the user to enter a valid time using whiptail
               while true; do
-                RESTART_TIME1=$(whiptail --title "Restart Time" --inputbox "Enter first restart time (24-hour format, e.g., 13:30):" 10 60 3>&1 1>&2 2>&3)
+                RESTART_TIME1=$(whiptail --title "Restart Time" --inputbox "Enter first restart time (24-hour format, e.g., 13:30):" 10 80 3>&1 1>&2 2>&3)
                 
                 # Validate the time format (24-hour format)
                 if [[ "$RESTART_TIME1" =~ ^([01][0-9]|2[0-3]):[0-5][0-9]$ ]]; then
                   break
                 else
-                  whiptail --title "Invalid Time" --msgbox "Please enter a valid time in 24-hour format (e.g., 13:30)." 10 60
+                  whiptail --title "Invalid Time" --msgbox "Please enter a valid time in 24-hour format (e.g., 13:30)." 10 80
                 fi
               done
               
@@ -367,13 +299,13 @@ if [[ $(sudo grep -c '/opt/dizcord/restart.sh' /var/spool/cron/crontabs/"$I_AM")
             4)
               # Validate and ask the user to enter a valid time using whiptail
               while true; do
-                RESTART_TIME1=$(whiptail --title "Restart Time" --inputbox "Enter first restart time (24-hour format, e.g., 13:30):" 10 60 3>&1 1>&2 2>&3)
+                RESTART_TIME1=$(whiptail --title "Restart Time" --inputbox "Enter first restart time (24-hour format, e.g., 13:30):" 10 80 3>&1 1>&2 2>&3)
                 
                 # Validate the time format (24-hour format)
                 if [[ "$RESTART_TIME1" =~ ^([01][0-9]|2[0-3]):[0-5][0-9]$ ]]; then
                   break
                 else
-                  whiptail --title "Invalid Time" --msgbox "Please enter a valid time in 24-hour format (e.g., 13:30)." 10 60
+                  whiptail --title "Invalid Time" --msgbox "Please enter a valid time in 24-hour format (e.g., 13:30)." 10 80
                 fi
               done
               
@@ -466,7 +398,7 @@ Maybe consider a small donation?\n\
 █ ▀▀▀ █ █ ▀▄▄█▀ ▀█▀ █ █▀ \n\
 ▀▀▀▀▀▀▀ ▀▀▀▀▀      ▀▀▀▀▀▀\n\
 \n\
-The QR Code goes to my Ko-fi site" 24 78
+The QR Code goes to my Ko-fi site" 24 80
 
 
 if [[ $(ps aux | grep ProjectZomboid64 | grep -v grep | wc -l ) -eq 1 ]]; then
@@ -478,4 +410,4 @@ else
 fi
 
 # DISPLAY THE CHOSEN INSTALLATION DIRECTORY, SERVER NAME, WEBHOOK, AND OTP
-#whiptail --title "Installation Summary" --msgbox "Installation Directory: $INILOCATION\nServer Name: $SERVER_NAME\nDiscord Webhook: $WEBHOOK\nOTP: $OTP\n\nPress OK to proceed with the installation." 10 60
+#whiptail --title "Installation Summary" --msgbox "Installation Directory: $INILOCATION\nServer Name: $SERVER_NAME\nDiscord Webhook: $WEBHOOK\nOTP: $OTP\n\nPress OK to proceed with the installation." 10 80
