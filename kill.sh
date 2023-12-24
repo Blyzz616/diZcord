@@ -4,7 +4,7 @@ URL='WEBHOOKPLACEHOLDER'
 RED=16711680
 ORANGE=16753920
 PLAYERS="Survivors still connected:"
-DOWN="**<SERVER NAME>** server going down now."
+DOWN="**<SERVER_NAME>** server going down now."
 
 touch /tmp/connected.players
 touch /tmp/connected.num
@@ -56,7 +56,7 @@ NOPLAYERS(){
 SOMEPLAYERS(){
   echo "SOMPLAYERS starting"
   screen -S PZ2 -p 0 -X stuff "players ^M"
-  tail -Fn0 /home/pzuser2/Zomboid/server-console.txt 2> /dev/null | \
+  tail -Fn0 /home/USERPLACEHOLDER/Zomboid/server-console.txt 2> /dev/null | \
   while read -r line ; do
     echo "SOMPLAYERS : $line"
     if [[ "$line" = -* ]];
@@ -87,7 +87,7 @@ SOMEPLAYERS(){
 
 
 SRVDN(){
-  tail -Fn0 /home/pzuser2/Zomboid/server-console.txt 2> /dev/null | \
+  tail -Fn0 /home/USERPLACEHOLDER/Zomboid/server-console.txt 2> /dev/null | \
   while read -r line ; do
     DISCONNSTEAM=$(echo "$line" | grep -E -o 'command-kick.*' | awk '{print $5}' | awk -F= '{print $2}')
     DISCONNPLAYER=$(echo "$line" | grep -E -o 'command-kick.*' | awk '{print $7}' | awk -F'"' '{print $2}')
