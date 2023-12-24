@@ -56,7 +56,7 @@ sudo apt install curl screen sed grep whiptail xargs jq
 Most of these are installed by default on most distros.
 
 
-First thig you need to do is create a new file in your home folder. I call mine `init.sh`
+First thing you need to do is create a new file in your home folder. I call mine `init.sh`
 put the following code in there
 
     #! /bin/bash
