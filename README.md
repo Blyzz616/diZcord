@@ -20,11 +20,9 @@ I've now also added a discord bot to control the discord server from a discord c
 Ok, So this needs to be run on the instance that is running the Project Zomboid server.
 Obviously the OS needs to be Linux with Bourne Again Shell (BASH) and a few other dependencies, listed later.
 You'll also have to have your own Discord Server (or have admin rights to the server) to get a Webhook set up.
-~~The user that you use to install diZcord should have sudo access.~~
+The user that you use to install diZcord should have sudo access.
 
 _File list:_
-
-~~The install wizard creates more executable scripts in /opt/disboid/ and one (start.sh) which is created in your home folder these are described below~~ (Will re-do this when it is working again)
 
 - start.sh - starts the server in a screen instance so that it will not be closed accidentally
 - restart.sh - Accepts inputs of "now" and "1" to "5" (./restart 4 will begin shutting down the server in 4 minutes)
@@ -57,12 +55,43 @@ sudo apt install curl screen sed grep whiptail xargs jq
 
 Most of these are installed by default on most distros.
 
-_Linking the scripts:_
 
-```
-ln -s /opt/dizcord/start.sh ~/start.sh
-ln -s /opt/dizcord/restart.sh ~/restart.sh
-```
+First thig you need to do is create a new file in your home folder. I call mine `init.sh`
+put the following code in there
+
+    #! /bin/bash
+
+    # Get latest version from github
+    LATEST_VERSION=$(curl -sL https://api.github.com/repos/Blyzz616/diZcord/releases/latest | jq -r '.tag_name')
+    
+    # Get current version
+    CURRENT_VERSION=$(sudo cat /opt/dizcord/current.version 2>/dev/null)
+    
+    # get current user name
+    I_AM=$(whoami)
+    
+    # Update if necessary
+    if [[ "$CURRENT_VERSION" !=  "$LATEST_VERSION" ]]; then
+      NO_V=$(echo "$LATEST_VERSION" | sed 's/v//')
+      sudo mkdir -p /opt/dizcord/
+      wget -q -O "/tmp/dizcord-$NO_V.tar.gz" "https://github.com/Blyzz616/diZcord/archive/$LATEST_VERSION.tar.gz"
+      tar -zxvf "/tmp/dizcord-$NO_V.tar.gz" -C /opt/dizcord/ --strip-components=1 >/dev/null
+      sudo chown -R "$I_AM":"$I_AM" /opt/dizcord
+      rm -r /tmp/di?cord*
+      echo "$LATEST_VERSION" > /opt/dizcord/current.version
+    fi
+    
+    sudo chmod ug+x /opt/dizcord/*.sh
+
+Make the script executable
+`sudo usermod ug+x init.sh`
+
+Then run the script
+`./init.sh`
+
+It will download the latest version of diZcord from here and put all the files in `/opt/dizcord/`
+
+How to use this diZcord:
 
 _Running the scripts:_
 
@@ -70,29 +99,32 @@ Start your server
 
 ```
 cd ~
-sudo ./start.sh
+./start.sh
 ```
 
-**CAUTION!** Running multiple instances of these scripts **WILL** cause duplicated output in discord.
-
-_Added Extra:_
-I include cronjobs to do this all for me
+If the server is already running and you want to restat it:
 
 ```
-sudo crontab -e
+cd ~
+./restart.sh
 ```
 
-addthe following lines
+IF anyone is online, it will give them 5 minutes to get to safety. It will also anounce this in-game. You can also shorten that 5 minutes when you enter the restart command like so:
 
 ```
-@reboot         /opt/dizcord/start.sh > /dev/null 2
+./restart <option>
 ```
 
-If you have a monitor plugged into your server and you want to use it to watch the raw PZ output like me, add this line as well:
+where <option> can be 1, 2, 3, 4, 5 or now
+
+The script will start PRoject Zomboid in it's own Screen session. To access the screen session:
 
 ```
-@reboot         tail -Fn0 ~/Zomboid/server-console.txt > /dev/tty1
+screen -r PZ
 ```
+
+To exit the screen session without killing the server: `CTRL`+`A` then `CTRL`+`D`
+
 
 
 _Payoff:_
@@ -106,20 +138,20 @@ The join script is not working so nicely, it isn't displaying the user ping as i
 - [x] re-write wizard to work with new file structure
 - [ ] fix connect.sh so that pings are displayed correctly
 - [ ] Wizard: add option to support multiple Zomboid servers
-- [ ] Wizard: add option to overwrite old settings
-- [ ] Wizard: Ask if installer should advertise on Discord
+- [x] Wizard: add option to overwrite old settings
+- [ ] Wizard: Ask if installer should advertise on Discord (don't remember what this was)
 - [x] Add [send "quit" to screen] for graceful shutdown
 - [x] Add per-user time logging (session/all-time)
 - [x] Get Steam Icon working when it is a GIF
-- [ ] Get Expanded HElicopter Events working
+- [ ] Get Expanded Helicopter Events working
 - [ ] Do the above and 'figger out' how to do it with per-server settings
 - [x] clean code to use best practices
 - [ ] refactor to Python?
-- [ ] Save all settings (server name/ports/webhook url/ etc) for updates
-- [ ] Change "Last played on" to reflect "today" and "yesterday"
+- [x] Save all settings (server name/ports/webhook url/ etc) for updates
+- [x] Change "Last played on" to reflect "today" and "yesterday"
 - [x] Add rage quit messages.
-- [ ] Added logic to recognise when someone dies and creates a new character (respanws) with some cool messages for discord.
-- [ ] Figure out the server up time with server name in `restart.sh` line 14
+- [x] Added logic to recognise when someone dies and creates a new character (respanws) with some cool messages for discord.
+- [x] Figure out the server up time with server name in `restart.sh` line 14
 
 Notes:
 If you get double quit notifications on player disconnect, it may be an anti-cheat problem.
@@ -134,12 +166,11 @@ Project Whiptail:
 - [x] Ask for the Server name
 - [x] Ask for the webhook
 - [x] Send message to web hook to test and ask if message was received
-- [ ] Ask if crontab entry should be added
-- [ ] check for existing crontab entries
-- [ ] Ask how many times a day
-- [ ] Get the 1st time and calculate other times
-- [ ] Convert times to crontab format
-- [ ] Maybe set this up as a service (unit file)?
+- [x] Ask if crontab entry should be added
+- [x] check for existing crontab entries
+- [x] Ask how many times a day
+- [x] Get the 1st time and calculate other times
+- [x] Convert times to crontab format
 - [ ] Have Instruction as last page how to control the server using scripts.
 - [ ] 
 ~~Ask if you want bot control~~ (too difficult if prereq not installed)
