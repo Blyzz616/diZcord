@@ -458,22 +458,21 @@ if [[ "$CURRENT_VERSION" !=  "$LATEST_VERSION" ]]; then
 fi
 
 # Lets replace all the placeholders with their correct values
-# replace home directory name
 for FILE in /opt/dizcord/kill.sh /opt/dizcord/obit.sh /opt/dizcord/reader.sh /opt/dizcord/restart.sh; do
+  # replace home directory name
   sed -i "s/USERPLACEHOLDER/$I_AM/g" "$FILE"
-done
-# replace webhooks
-for FILE in /opt/dizcord/kill.sh /opt/dizcord/reader.sh /opt/dizcord/restart.sh /opt/dizcord/start.sh; do
+  # replace webhooks
   sed -i "s!WEBHOOKPLACEHOLDER!$WEBHOOK!g" "$FILE" #those damned forward /opt/dizcord/slashes!
 done
 # replace human readable server name
 for FILE in /opt/dizcord/start.sh /opt/dizcord/restart.sh; do
   sed -i "s/HRNAME/$SERVER_NAME/g" "$FILE"
 done
-# replace the server-start name
-for FILE in /opt/dizcord/start.sh /opt/dizcord/restart.sh; do
+# replace the server's ini name
+for FILE in /opt/dizcord/start.sh /opt/dizcord/restart.sh /opt/dizcord/reader.sh; do
   sed -i "s/ININAME/$ININAME/" "$FILE"
 done
+
 
 # Good, now let's make sure that everything is executable
 sudo chmod ug+x /opt/dizcord/*.sh
