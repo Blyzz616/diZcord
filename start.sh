@@ -7,7 +7,7 @@ source /opt/dizcord/colours.dec
 MESSAGE="**HRNAME** server reanimating now."
 
 date +%s > "/opt/dizcord/times/ININAME-start.time"
-curl -H "Content-Type: application/json" -X POST -d "{\"embeds\": [{ \"color\": \"$BLUE\", \"description\": \"$MESSAGE\" }] }" "$URL"
+curl -H "Content-Type: application/json" -X POST -d "{\"embeds\": [{ \"color\": \"$DISCORDBLUE\", \"description\": \"$MESSAGE\" }] }" "$URL"
 
 [[ $(screen -ls | grep -c -E 'PZ\s') -eq 0 ]] && \
 screen -dm -s /bin/bash -S PZ -L -Logfile /tmp/PZ.log && \
