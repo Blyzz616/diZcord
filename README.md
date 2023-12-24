@@ -44,7 +44,7 @@ _File list:_
 - Announces the different states of the chopper event (with some fun random messages). Busy integrating Expanded Helicopter Events (EHE)
 - Announces when the server is being taken down with a server-up timer
 
-_Installation:_
+**Installation**:
 
 Open a terminal to your server and make sure that all the dependencies are installed:
 
@@ -91,7 +91,19 @@ Then run the script
 
 It will download the latest version of diZcord from here and put all the files in `/opt/dizcord/`
 
-How to use this diZcord:
+Now head on over to /opt/dizcord/
+
+```
+cd /opt/dizcord/
+```
+
+and run the install wizard:
+
+```
+./wizard.sh
+```
+
+**How to use diZcord:**
 
 _Running the scripts:_
 
