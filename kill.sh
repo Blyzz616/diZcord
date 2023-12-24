@@ -1,10 +1,10 @@
 #!/bin/bash
 
 URL='WEBHOOKPLACEHOLDER'
-RED=16711680
-ORANGE=16753920
+source /opt/dizcord/colours.dec
+
 PLAYERS="Survivors still connected:"
-DOWN="**<SERVER_NAME>** server going down now."
+DOWN="**HRNAME** server going down now."
 
 touch /tmp/connected.players
 touch /tmp/connected.num
@@ -13,19 +13,18 @@ echo "" > /tmp/connected.num
 
 KILL(){
   echo "running KILL"
-  screen -S PZ2-S-obit -p 0 -X stuff "^C exit ^M"
-  screen -S PZ2-S-discon -p 0 -X stuff "^C exit ^M"
-  screen -S PZ2-S-startup -p 0 -X stuff "^C exit ^M"
-  screen -S PZ2-S-connect -p 0 -X stuff "^C exit ^M"
-  screen -S PZ2-S-chopper -p 0 -X stuff "^C exit ^M"
-  screen -S PZ2-S-shutdown -p 0 -X stuff "^C exit ^M"
-  screen -S PZ2-S-stream -p 0 -X stuff "^C exit ^M"
+  screen -S PZ-S-obit -p 0 -X stuff "^C exit ^M"
+  screen -S PZ-S-discon -p 0 -X stuff "^C exit ^M"
+  screen -S PZ-S-startup -p 0 -X stuff "^C exit ^M"
+  screen -S PZ-S-connect -p 0 -X stuff "^C exit ^M"
+  screen -S PZ-S-chopper -p 0 -X stuff "^C exit ^M"
+  screen -S PZ-S-shutdown -p 0 -X stuff "^C exit ^M"
+  screen -S PZ-S-stream -p 0 -X stuff "^C exit ^M"
 }
 
-UPCALC(){
-  echo "running UPCALC"
+TIMECALC () {
   #get timestamp from srvr-up.time
-  TIMEUP=$(cat /tmp/srvr2-up.time)
+  TIMEUP=$(</opt/dizcord/times/ININAME.up)
   #calculate up-time
   TIMEDOWN=$(date +%s)
   UPSECS=$(( TIMEDOWN - TIMEUP ))
@@ -41,10 +40,11 @@ UPCALC(){
   else
     UPTIME=$(printf '%ds' $((UPSECS)))
   fi
-
-  MESSAGE="The Server was up for $UPTIME"
-  curl -H "Content-Type: application/json" -X POST -d "{\"embeds\": [{ \"color\": \"$RED\", \"title\": \"$DOWN\", \"description\": \"$MESSAGE\" }] }" $URL
 }
+TIMECALC
+MESSAGE="The Server was up for $UPTIME"
+DOWN="**HRNAME** server going down now."
+curl -H "Content-Type: application/json" -X POST -d "{\"embeds\": [{ \"color\": \"$RED\", \"title\": \"$DOWN\", \"description\": \"$MESSAGE\" }] }" $URL
 
 NOPLAYERS(){
   echo "NOPLAYERS :  $line"
@@ -55,7 +55,7 @@ NOPLAYERS(){
 
 SOMEPLAYERS(){
   echo "SOMPLAYERS starting"
-  screen -S PZ2 -p 0 -X stuff "players ^M"
+  screen -S PZ -p 0 -X stuff "players ^M"
   tail -Fn0 /home/USERPLACEHOLDER/Zomboid/server-console.txt 2> /dev/null | \
   while read -r line ; do
     echo "SOMPLAYERS : $line"
@@ -71,10 +71,10 @@ SOMEPLAYERS(){
         curl -H "Content-Type: application/json" -X POST -d "{\"embeds\": [{ \"color\": \"$ORANGE\", \"title\": \"$DOWN\", \"description\": \"$MESSAGE\", \"fields\": [{ \"name\": \"Ejecting Survivors:\", \"value\": \"$PLAYERNAMES\" }] }] }" $URL
         for PLAYERS in $PLAYERNAMES
         do
-          screen -S PZ2 -p 0 -X stuff "kickuser $PLAYERS -r \"The Server is going down now. Sorry.\" ^M"
+          screen -S PZ -p 0 -X stuff "kickuser $PLAYERS -r \"The Server is going down now. Sorry.\" ^M"
         done
         KILL
-          screen -S PZ2 -p 0 -X stuff "quit ^M"
+          screen -S PZ -p 0 -X stuff "quit ^M"
         SRVDN
         break
       fi
@@ -137,9 +137,9 @@ SRVDN(){
     fi
     if [[ -n  "$SRV" ]];
     then
-      screen -S PZ2 -p 0 -X stuff "^C"
+      screen -S PZ -p 0 -X stuff "^C"
       sleep 2
-      screen -S PZ2 -p 0 -X stuff "exit ^M"
+      screen -S PZ -p 0 -X stuff "exit ^M"
     fi
   done
 }
@@ -162,7 +162,7 @@ READER(){
 
 SENT(){
   echo "SENT"
-  screen -S PZ2 -p 0 -X stuff "players ^M"
+  screen -S PZ -p 0 -X stuff "players ^M"
 }
 
 READER
