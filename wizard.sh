@@ -4,6 +4,7 @@
 STARTINI=()
 ENDDOTS=""
 
+
 # Set up directories
 I_AM=$(whoami)
 sudo mkdir -p /opt/dizcord/playerdb/html /opt/dizcord/times /opt/dizcord/boidbot
@@ -249,21 +250,7 @@ By selecting \"Yes\" you agree to the above
 "
 
 if whiptail --title "GNU GPL v3 License" --yesno "$LICENSE_TEXT" 26 80; then
-  sudo echo -e "GNU General Public License v3.0
-
-Copyright (c) 2023 Jim Sher
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program. If not, see <https://www.gnu.org/licenses/>." > /opt/dizcord/licence.txt
+  echo -e "You can find a copy of this license is in /opt/dizcord/licence.txt"
 else
   exit
 fi
@@ -470,7 +457,7 @@ for FILE in /opt/dizcord/start.sh /opt/dizcord/restart.sh; do
 done
 # replace the server's ini name
 for FILE in /opt/dizcord/start.sh /opt/dizcord/restart.sh /opt/dizcord/reader.sh; do
-  sed -i "s/ININAME/$ININAME/" "$FILE"
+  sed -i "s/ININAME/$STARTINI/" "$FILE"
 done
 
 
