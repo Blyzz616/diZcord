@@ -14,7 +14,6 @@ LINE=""
 
 # A lot of this stuff used in multiple funcitons
 SRVRUP=""
-SRVRNAME=""
 RANDOM=""
 STEAMID=""
 CONNIP=""
@@ -36,7 +35,7 @@ DISCONN=""
 DEADPLAYER=""
 
 # This should only run once, when the SCRIPT is started (before the server comes online)
-date +%s > /opt/dizcord/times/"$SRVRNAME".up
+date +%s > /opt/dizcord/times/ININAME.up
 
 # We're gonna need a seed for almost everything... and we're gonna be calling it quite a bit so here it is:
 SEED(){
@@ -506,19 +505,13 @@ OBIT(){
 }
 
 STARTUP(){
-  # get server codename
-  SRVRNAME=$(ps aux | grep 'servername' | grep -v grep | grep Project | awk '{print $NF}')
   # get the start time from file file
-  RISING=$(cat /opt/dizcord/times/"$SRVRNAME"-start.time)
-  rm /opt/dizcord/times/"$SRVRNAME"-start.time
+  RISING=$(cat /opt/dizcord/times/ININAME-start.time)
+  rm /opt/dizcord/times/ININAME-start.time
   RISEN=$(date +%s)
   RISESECS=$(( RISEN - RISING ))
-# old
-#  touch /opt/dizcord/"$SRVRNAME".up
-#  echo "$(date +%c) $SRVRNAME RISESECS" >> /opt/dizcord/"$SRVRNAME".up
-# new
-  touch /opt/dizcord/times/"$SRVRNAME".up
-  date +%s > /opt/dizcord/times/"$SRVRNAME".up
+  touch /opt/dizcord/times/ININAME.up
+  date +%s > /opt/dizcord/times/ININAME.up
 
   if [[ $RISESECS -ge 60 ]]; then
     RISETIME=$(printf '%dm %ds' $((RISESECS/60)) $((RISESECS%60)))
@@ -531,10 +524,8 @@ STARTUP(){
 }
 
 SHUTDOWN(){
-  # get server codename
-  SRVRNAME=$(ps aux | grep 'servername' | grep -v grep | grep Project | awk '{print $NF}')
   #get timestamp from srvr-up.time
-  TIMEUP=$(cat /opt/dizcord/times/"$SRVRNAME".up)
+  TIMEUP=$(cat /opt/dizcord/times/ININAME.up)
   #calculate up-time
   TIMEDOWN=$(date +%s)
   UPSECS=$(( TIMEDOWN - TIMEUP ))
