@@ -6,14 +6,12 @@ source /opt/dizcord/colours.dec
 
 MESSAGE="**HRNAME** server reanimating now."
 
-SRVRINI="ININAME"
-
 date +%s > "/opt/dizcord/times/$SRVRINI-start.time"
 curl -H "Content-Type: application/json" -X POST -d "{\"embeds\": [{ \"color\": \"$BLUE\", \"description\": \"$MESSAGE\" }] }" "$URL"
 
 [[ $(screen -ls | grep -c -E 'PZ\s') -eq 0 ]] && \
 screen -dm -s /bin/bash -S PZ -L -Logfile /tmp/PZ.log && \
-screen -S PZ -X stuff "/home/pz1/Zomboid/start-server.sh -servername $SRVRINI ^M"
+screen -S PZ -X stuff "/home/pz1/Zomboid/start-server.sh -servername ININAME ^M"
 
 [[ $(screen -ls | grep -c -E 'PZ-reader') -eq 0 ]] && \
 screen -dm -s /bin/bash -S PZ-reader -L -Logfile /tmp/PZ-reader.log && \
