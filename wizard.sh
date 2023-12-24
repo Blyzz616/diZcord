@@ -249,7 +249,6 @@ By selecting \"Yes\" you agree to the above
 "
 
 if whiptail --title "GNU GPL v3 License" --yesno "$LICENSE_TEXT" 26 80; then
-  sudo touch /opt/dizcord/licence.txt
   sudo echo -e "GNU General Public License v3.0
 
 Copyright (c) 2023 Jim Sher
