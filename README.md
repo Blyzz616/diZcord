@@ -44,6 +44,8 @@ _File list:_
 - Announces the different states of the chopper event (with some fun random messages). Busy integrating Expanded Helicopter Events (EHE)
 - Announces when the server is being taken down with a server-up timer
 
+---
+
 **Installation**:
 
 Open a terminal to your server and make sure that all the dependencies are installed:
@@ -55,39 +57,37 @@ sudo apt install curl screen sed grep whiptail xargs jq
 
 Most of these are installed by default on most distros.
 
+Before starting, shut down your **Project Zomboid** server by entering `quit` into the server's console as an admin.
 
-First thing you need to do is create a new file in your home folder. I call mine `init.sh`
-put the following code in there
+Create a new file in your home folder called `init.sh` with the following code in there *(I'll describee it line for line later)*:
 
-    #! /bin/bash
+```
+#! /bin/bash
+LATEST_VERSION=$(curl -sL https://api.github.com/repos/Blyzz616/diZcord/releases/latest | jq -r '.tag_name')
+CURRENT_VERSION=$(sudo cat /opt/dizcord/current.version 2>/dev/null)
+I_AM=$(whoami)
+if [[ "$CURRENT_VERSION" !=  "$LATEST_VERSION" ]]; then
+  NO_V=$(echo "$LATEST_VERSION" | sed 's/v//')
+  sudo mkdir -p /opt/dizcord/
+  wget -q -O "/tmp/dizcord-$NO_V.tar.gz" "https://github.com/Blyzz616/diZcord/archive/$LATEST_VERSION.tar.gz"
+  tar -zxvf "/tmp/dizcord-$NO_V.tar.gz" -C /opt/dizcord/ --strip-components=1 >/dev/null
+  sudo chown -R "$I_AM":"$I_AM" /opt/dizcord
+  rm -r /tmp/di?cord*
+  echo "$LATEST_VERSION" > /opt/dizcord/current.version
+fi
+sudo chmod ug+x /opt/dizcord/*.sh
+```
 
-    # Get latest version from github
-    LATEST_VERSION=$(curl -sL https://api.github.com/repos/Blyzz616/diZcord/releases/latest | jq -r '.tag_name')
-    
-    # Get current version
-    CURRENT_VERSION=$(sudo cat /opt/dizcord/current.version 2>/dev/null)
-    
-    # get current user name
-    I_AM=$(whoami)
-    
-    # Update if necessary
-    if [[ "$CURRENT_VERSION" !=  "$LATEST_VERSION" ]]; then
-      NO_V=$(echo "$LATEST_VERSION" | sed 's/v//')
-      sudo mkdir -p /opt/dizcord/
-      wget -q -O "/tmp/dizcord-$NO_V.tar.gz" "https://github.com/Blyzz616/diZcord/archive/$LATEST_VERSION.tar.gz"
-      tar -zxvf "/tmp/dizcord-$NO_V.tar.gz" -C /opt/dizcord/ --strip-components=1 >/dev/null
-      sudo chown -R "$I_AM":"$I_AM" /opt/dizcord
-      rm -r /tmp/di?cord*
-      echo "$LATEST_VERSION" > /opt/dizcord/current.version
-    fi
-    
-    sudo chmod ug+x /opt/dizcord/*.sh
+Make the script executable:
 
-Make the script executable
-`sudo usermod ug+x init.sh`
+```
+sudo usermod ug+x init.sh
+```
 
 Then run the script
-`./init.sh`
+```
+./init.sh
+```
 
 It will download the latest version of diZcord from here and put all the files in `/opt/dizcord/`
 
@@ -97,11 +97,56 @@ Now head on over to /opt/dizcord/
 cd /opt/dizcord/
 ```
 
-and run the install wizard:
+Run the install wizard:
 
 ```
 ./wizard.sh
 ```
+
+---
+
+_Explanation of the init.sh file:_
+
+1. `LATEST_VERSION=$(curl -sL https://api.github.com/repos/Blyzz616/diZcord/releases/latest | jq -r '.tag_name')`
+
+
+    **curl -sL**: This command is used to make an HTTP GET request to the specified URL (https://api.github.com/repos/Blyzz616/diZcord/releases/latest).
+    **| jq -r '.tag_name'**: The output of the curl command is passed through jq, a lightweight and flexible command-line JSON processor. This part extracts the value of the 'tag_name' key from the JSON response, effectively retrieving the latest version of the diZcord release from GitHub. The result is stored in the variable `LATEST_VERSION`.
+
+
+2. `CURRENT_VERSION=$(sudo cat /opt/dizcord/current.version 2>/dev/null)`
+
+    **sudo cat /opt/dizcord/current.version**: Reads the content of the file /opt/dizcord/current.version.
+    **2>/dev/null**: Redirects any error output to /dev/null (a special file that discards the output). If the file doesn't exist or there is an error reading it, this line won't produce an error message. The result is stored in the variable `CURRENT_VERSION`.
+
+
+3. `I_AM=$(whoami)`: Retrieves the current username and assigns it to the variable `I_AM`.
+
+
+4. `if [[ "$CURRENT_VERSION" != "$LATEST_VERSION" ]]; then`: Checks whether the current version ($CURRENT_VERSION) is not equal to the latest version ($LATEST_VERSION).
+
+5. `NO_V=$(echo "$LATEST_VERSION" | sed 's/v//')`: Removes the leading 'v' from the latest version and assigns the result to the variable `NO_V`.
+
+6. `sudo mkdir -p /opt/dizcord/`: Creates the directory /opt/dizcord/ if it doesn't exist.
+
+7. `wget -q -O "/tmp/dizcord-$NO_V.tar.gz" "https://github.com/Blyzz616/diZcord/archive/$LATEST_VERSION.tar.gz"`: Downloads the diZcord release tarball from GitHub and saves it as `/tmp/dizcord-$NO_V.tar.gz`.
+
+8. `tar -zxvf "/tmp/dizcord-$NO_V.tar.gz" -C /opt/dizcord/ --strip-components=1 >/dev/null`: Extracts the contents of the tarball to `/opt/dizcord/` while suppressing output.
+
+9. `sudo chown -R "$I_AM":"$I_AM" /opt/dizcord`: Changes the ownership of the /opt/dizcord/ directory and its contents to the current user.
+
+10 `rm -r /tmp/di?cord*`: Removes temporary files in /tmp/ that match the pattern /tmp/di?cord*.
+
+11. `echo "$LATEST_VERSION" > /opt/dizcord/current.version`: Writes the latest version to the file /opt/dizcord/current.version.
+
+12. `fi`: Ends the if block.
+
+13. `sudo chmod ug+x /opt/dizcord/*.sh`: Changes the permissions of all .sh files in the /opt/dizcord/ directory to make them executable by the owner and the owner's group.
+
+
+As all the code in `wizard.sh` is in github, all are free to view it and inspect it. You can even paste it into a GPT and ask the Generative LLM if there is any malicious code in there.
+
+---
 
 **How to use diZcord:**
 
@@ -121,15 +166,15 @@ cd ~
 ./restart.sh
 ```
 
-IF anyone is online, it will give them 5 minutes to get to safety. It will also anounce this in-game. You can also shorten that 5 minutes when you enter the restart command like so:
+If anyone is online in your Project Zomboid server , it will give them 5 minutes to get to safety. It will also anounce this in-game. You can also shorten that 5 minutes when you enter the restart command like so:
 
 ```
 ./restart <option>
 ```
 
-where <option> can be 1, 2, 3, 4, 5 or now
+where <option> can be "`1`", "`2`", "`3`", "`4`", "`5`" or "`now`"
 
-The script will start PRoject Zomboid in it's own Screen session. To access the screen session:
+The script will start Project Zomboid in it's own Screen session to ensure that you can log out of the server session without killing your PZ server. To access the screen session:
 
 ```
 screen -r PZ
@@ -137,28 +182,29 @@ screen -r PZ
 
 To exit the screen session without killing the server: `CTRL`+`A` then `CTRL`+`D`
 
+---
 
-
-_Payoff:_
+_**Payoff:**_
 
 Now join your Project Zomboid server and watch discord for all the glory.
 
+---
+
 _Known bugs / To Do:_
 
-The join script is not working so nicely, it isn't displaying the user ping as it should be for some reason. I'll work on it at some point, but for right now, it is working well enough.
-- [x] Possibly merge all monitoring files to run in one script?
-- [x] re-write wizard to work with new file structure
 - [ ] fix connect.sh so that pings are displayed correctly
 - [ ] Wizard: add option to support multiple Zomboid servers
-- [x] Wizard: add option to overwrite old settings
 - [ ] Wizard: Ask if installer should advertise on Discord (don't remember what this was)
+- [ ] Get Expanded Helicopter Events working
+- [ ] Allow for multiple PZ servers on one box
+- [ ] refactor to Python?
+- [x] Possibly merge all monitoring files to run in one script?
+- [x] re-write wizard to work with new file structure
+- [x] Wizard: add option to overwrite old settings
 - [x] Add [send "quit" to screen] for graceful shutdown
 - [x] Add per-user time logging (session/all-time)
 - [x] Get Steam Icon working when it is a GIF
-- [ ] Get Expanded Helicopter Events working
-- [ ] Do the above and 'figger out' how to do it with per-server settings
 - [x] clean code to use best practices
-- [ ] refactor to Python?
 - [x] Save all settings (server name/ports/webhook url/ etc) for updates
 - [x] Change "Last played on" to reflect "today" and "yesterday"
 - [x] Add rage quit messages.
@@ -185,4 +231,3 @@ Project Whiptail:
 - [x] Convert times to crontab format
 - [ ] Have Instruction as last page how to control the server using scripts.
 - [ ] 
-~~Ask if you want bot control~~ (too difficult if prereq not installed)
