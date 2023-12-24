@@ -524,4 +524,4 @@ dailyH=$SCHEDULEHRS
 dailyM=$SCHEDULEMIN
 # The current version of diZcord
 version=$CURRENT_VERSION
-" > /opt/dizcord/settings.ini 
+" > /opt/dizcord/settings.ini
