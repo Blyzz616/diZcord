@@ -462,11 +462,11 @@ fi
 # replace home directory name
 sed -i "s/USERPLACEHOLDER/"$I_AM"/g" /opt/dizcord/*
 # replace webhooks
-sed -i 's/WEBHOOKPLACEHOLDER/$WEBHOOK/g' /opt/dizcord/*
+sed -i "s/WEBHOOKPLACEHOLDER/$WEBHOOK/g" /opt/dizcord/*
 # replace human readable server name
-sed -i 's/HRNAME/$SERVER_NAME/g' /opt/dizcord/*
+sed -i "s/HRNAME/$SERVER_NAME/g" /opt/dizcord/*
 # replace the server-start name
-sed -i 's/ININAME/$ININAME/' /opt/dizcord/*
+sed -i "s/ININAME/$ININAME/" /opt/dizcord/*
 
 # Good, now let's make sure that everything is executable
 sudo chmod ug+x /opt/dizcord/*.sh
