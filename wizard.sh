@@ -445,7 +445,7 @@ if [[ "$CURRENT_VERSION" !=  "$LATEST_VERSION" ]]; then
 fi
 
 # Lets replace all the placeholders with their correct values
-for FILE in /opt/dizcord/kill.sh /opt/dizcord/obit.sh /opt/dizcord/reader.sh /opt/dizcord/restart.sh; do
+for FILE in /opt/dizcord/kill.sh /opt/dizcord/obit.sh /opt/dizcord/reader.sh /opt/dizcord/restart.sh /opt/dizcord/start.sh; do
   # replace home directory name
   sed -i "s/USERPLACEHOLDER/$I_AM/g" "$FILE"
   # replace webhooks
