@@ -192,8 +192,10 @@ Now join your Project Zomboid server and watch discord for all the glory.
 
 _Known bugs / To Do:_
 
-- [ ] fix connect.sh so that pings are displayed correctly
 - [ ] Wizard: add option to support multiple Zomboid servers
+- [ ] Detect previous installation
+  - [ ] ask if we want to set up a new server or change existing settings
+- [ ] fix connect in reader so that pings are displayed
 - [ ] Wizard: Ask if installer should advertise on Discord (don't remember what this was)
 - [ ] Get Expanded Helicopter Events working
 - [ ] Allow for multiple PZ servers on one box
