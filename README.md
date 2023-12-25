@@ -59,7 +59,7 @@ Most of these are installed by default on most distros.
 
 Before starting, shut down your **Project Zomboid** server by entering `quit` into the server's console as an admin.
 
-Create a new file in your home folder called `init.sh` with the following code in there *(I'll describee it line for line later)*:
+Create a new file in your home folder called `init.sh` with the following code in there *(I'll describe it line-for-line later)*:
 
 ```
 #! /bin/bash
@@ -110,7 +110,7 @@ _Explanation of the init.sh file:_
 1. `LATEST_VERSION=$(curl -sL https://api.github.com/repos/Blyzz616/diZcord/releases/latest | jq -r '.tag_name')`
 
 
-    **curl -sL**: This command is used to make an HTTP GET request to the specified URL (https://api.github.com/repos/Blyzz616/diZcord/releases/latest).
+    **curl -sL**: This command is used to make an HTTP GET request to the specified URL (https://api.github.com/repos/Blyzz616/diZcord/releases/latest).<br>
     **| jq -r '.tag_name'**: The output of the curl command is passed through jq, a lightweight and flexible command-line JSON processor. This part extracts the value of the 'tag_name' key from the JSON response, effectively retrieving the latest version of the diZcord release from GitHub. The result is stored in the variable `LATEST_VERSION`.
 
 
@@ -123,13 +123,13 @@ _Explanation of the init.sh file:_
 3. `I_AM=$(whoami)`: Retrieves the current username and assigns it to the variable `I_AM`.
 
 
-4. `if [[ "$CURRENT_VERSION" != "$LATEST_VERSION" ]]; then`: Checks whether the current version ($CURRENT_VERSION) is not equal to the latest version ($LATEST_VERSION).
+4. `if [[ "$CURRENT_VERSION" != "$LATEST_VERSION" ]]; then`: Checks whether the current version (`$CURRENT_VERSION`) is not equal to the latest version (`$LATEST_VERSION`).
 
 5. `NO_V=$(echo "$LATEST_VERSION" | sed 's/v//')`: Removes the leading 'v' from the latest version and assigns the result to the variable `NO_V`.
 
 6. `sudo mkdir -p /opt/dizcord/`: Creates the directory /opt/dizcord/ if it doesn't exist.
 
-7. `wget -q -O "/tmp/dizcord-$NO_V.tar.gz" "https://github.com/Blyzz616/diZcord/archive/$LATEST_VERSION.tar.gz"`: Downloads the diZcord release tarball from GitHub and saves it as `/tmp/dizcord-$NO_V.tar.gz`.
+7. `wget -q -O "/tmp/dizcord-$NO_V.tar.gz" "https://github.com/Blyzz616/diZcord/archive/$LATEST_VERSION.tar.gz"`: Downloads the diZcord release tarball (zip file) from GitHub and saves it as `/tmp/dizcord-$NO_V.tar.gz`.
 
 8. `tar -zxvf "/tmp/dizcord-$NO_V.tar.gz" -C /opt/dizcord/ --strip-components=1 >/dev/null`: Extracts the contents of the tarball to `/opt/dizcord/` while suppressing output.
 
@@ -144,7 +144,7 @@ _Explanation of the init.sh file:_
 13. `sudo chmod ug+x /opt/dizcord/*.sh`: Changes the permissions of all .sh files in the /opt/dizcord/ directory to make them executable by the owner and the owner's group.
 
 
-As all the code in `wizard.sh` is in github, all are free to view it and inspect it. You can even paste it into a GPT and ask the Generative LLM if there is any malicious code in there.
+As all the code in `wizard.sh` is in github, all are free to view it and inspect it. You can even paste it into a GPT and ask a Generative LLM if there is any malicious code in there.
 
 ---
 
@@ -180,7 +180,7 @@ The script will start Project Zomboid in it's own Screen session to ensure that 
 screen -r PZ
 ```
 
-To exit the screen session without killing the server: `CTRL`+`A` then `CTRL`+`D`
+To exit the screen session without killing the server: <kbd>Ctrl</kbd>+<kbd>A</kbd> then <kbd>Ctrl</kbd>+<kbd>D</kbd>
 
 ---
 
@@ -218,7 +218,7 @@ Try disabling anti-cheat 21 & 22 in Zomboid Server configuration.
 And lastly, if you made it this far and want to buy me a beer (or a laptop), please feel free to make a donation on my ko-fi!
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/A0A2RROUR)
 
-Project Whiptail:
+Project Whiptail: ***COMPLETE! OMG***
 - [x] Search for any existing Zomboid installs
 - [x] Display ALL Zomboid Installations and ask which this will be for with radio-button style
 - [x] Ask for the Server name
@@ -229,5 +229,4 @@ Project Whiptail:
 - [x] Ask how many times a day
 - [x] Get the 1st time and calculate other times
 - [x] Convert times to crontab format
-- [ ] Have Instruction as last page how to control the server using scripts.
-- [ ] 
+- [x] Have Instruction as last page how to control the server using scripts.
