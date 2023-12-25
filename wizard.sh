@@ -463,6 +463,12 @@ sudo chmod ug+x /opt/dizcord/*.sh
 ln -s /opt/dizcord/restart.sh /home/"$I_AM"/restart.sh 2>/dev/null
 ln -s /opt/dizcord/start.sh /home/"$I_AM"/start.sh 2>/dev/null
 
+whiptail --title "How to use." --msgbox "Once you are all done here, head to your home directory and start the Project Zomboid server by typing:\n\n\
+./start.sh\n\n\
+Once the Project Zomboid Zomboid server is running, to restart it, enter the following in your home directory:\n\n\
+./restart.sh\n\n\
+And that's pretty much it, you're good to go!" 18 80
+
 whiptail --title "Thanks for using dizcord." --msgbox "
 Maybe consider a small donation?\n\
 \n\n\n\
