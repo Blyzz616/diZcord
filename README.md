@@ -212,7 +212,7 @@ _Known bugs / To Do:_
 - [x] Change "Last played on" to reflect "today" and "yesterday"
 - [x] Add rage quit messages.
 - [x] Added logic to recognise when someone dies and creates a new character (respanws) with some cool messages for discord.
-- [x] Figure out the server up time with server name in `restart.sh` line 14
+- [x] Figure out the server up time with server name in `restart.sh`
 
 Notes:
 If you get double quit notifications on player disconnect, it may be an anti-cheat problem.
@@ -233,3 +233,6 @@ Project Whiptail: ***COMPLETE! OMG***
 - [x] Get the 1st time and calculate other times
 - [x] Convert times to crontab format
 - [x] Have Instruction as last page how to control the server using scripts.
+
+Whiptail addon
+- [ ] Ask if Geo-Location data can be sent back ***opt-in only***
