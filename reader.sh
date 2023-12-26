@@ -263,6 +263,12 @@ JOIN(){
   touch /opt/dizcord/times/"$STEAMID".online
   date +%s > /opt/dizcord/times/"$STEAMID".online
 
+  if [[ -n "$CONNIP" ]]; then
+    if [[ ! -f /opt/dizocrd/playerdb/"$STEAMID".about ]]; then
+      curl -sL http://ip-api.com/json/"CONNIP"?fields=36757983 > /opt/dizcord/playerdb/"$STEAMID".about
+    fi
+  fi
+
   STEAMLINK="https://steamcommunity.com/profiles/$STEAMID"
   if [[ $(grep -c "$STEAMID" /opt/dizcord/playerdb/users.log) -gt 0 ]]; then
     #use local info to reduce unnecessary net lookups
