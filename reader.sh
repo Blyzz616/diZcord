@@ -270,6 +270,7 @@ JOIN(){
     else
       if [[ $(cat /opt/dizcord/playerdb/"$STEAMID".about | jq -r '.status') = "fail" ]]; then
         curl -sL http://ip-api.com/json/"$CONNIP"?fields=36757983 > /opt/dizcord/playerdb/"$STEAMID".about
+      fi
     fi
   fi
 
