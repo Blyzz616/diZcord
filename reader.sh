@@ -264,8 +264,12 @@ JOIN(){
   date +%s > /opt/dizcord/times/"$STEAMID".online
 
   if [[ -n "$CONNIP" ]]; then
+    MS=$(ping -c 4 "$CONNIP" | grep -oP "(?<=time=)\d+(\.\d+)?(?= ms)" | awk '{sum+=$1} END {print sum/NR}' | awk -F"." '{print $1}')
     if [[ ! -f /opt/dizocrd/playerdb/"$STEAMID".about ]]; then
-      curl -sL http://ip-api.com/json/"CONNIP"?fields=36757983 > /opt/dizcord/playerdb/"$STEAMID".about
+      curl -sL http://ip-api.com/json/"$CONNIP"?fields=36757983 > /opt/dizcord/playerdb/"$STEAMID".about
+    else
+      if [[ $(cat /opt/dizcord/playerdb/"$STEAMID".about | jq -r '.status') = "fail" ]]; then
+        curl -sL http://ip-api.com/json/"$CONNIP"?fields=36757983 > /opt/dizcord/playerdb/"$STEAMID".about
     fi
   fi
 
@@ -275,51 +279,50 @@ JOIN(){
     STEAMNAME=$(grep -E "$STEAMID" /opt/dizcord/playerdb/users.log | awk -F"\t" '{print $3}')
     IMGNAME=$(grep -E "$STEAMID" /opt/dizcord/playerdb/users.log | awk '{print $NF}')
   else
-    wget -O /tmp/"$STEAMID".html "$STEAMLINK"
+    wget -O /opt/dizcord/playerdb/html/"$STEAMID".html "$STEAMLINK"
     #get Steam Username
-    STEAMNAME=$(grep -E '<title>' /tmp/"$STEAMID".html | awk -F":" '{print $3}' | xargs | awk -F"<" '{print $1}')
-    #STEAMNAME=$(grep -E '<title>' /tmp/"$STEAMID".html | awk '{print $4}' | rev | cut -c10- | rev)
+    STEAMNAME=$(grep -E '<title>' /opt/dizcord/playerdb/html/"$STEAMID".html | awk -F":" '{print $3}' | xargs | awk -F"<" '{print $1}')
     # get image extension
     # some profiles have backgrounds, if they do, then we need to modify the code to ignore them
-    if grep -q 'has_profile_background' /tmp/"$STEAMID".html; then
-      IMGEXT=$(grep -E -A4 'playerAvatarAutoSizeInner' /tmp/"$STEAMID".html | tail -n1 | awk -F'"' '{print $2}' | awk -F. '{print $NF}')
+    if grep -q 'has_profile_background' /opt/dizcord/playerdb/html/"$STEAMID".html; then
+      IMGEXT=$(grep -E -A4 'playerAvatarAutoSizeInner' /opt/dizcord/playerdb/html/"$STEAMID".html | tail -n1 | awk -F'"' '{print $2}' | awk -F. '{print $NF}')
       # get the user image
-      wget -O /opt/dizcord/playerdb/images/"$STEAMID"."$IMGEXT" $(grep -A4 'playerAvatarAutoSizeInner' /tmp/"$STEAMID".html | tail -n1 | awk -F'"' '{print $2}')
+      wget -O /opt/dizcord/playerdb/images/"$STEAMID"."$IMGEXT" $(grep -A4 'playerAvatarAutoSizeInner' /opt/dizcord/playerdb/html/"$STEAMID".html | tail -n1 | awk -F'"' '{print $2}')
       # get image link
-      IMGNAME=$(grep -A4 'playerAvatarAutoSizeInner' /tmp/"$STEAMID".html | tail -n1 | awk -F'"' '{print $2}')
+      IMGNAME=$(grep -A4 'playerAvatarAutoSizeInner' /opt/dizcord/playerdb/html/"$STEAMID".html | tail -n1 | awk -F'"' '{print $2}')
     else
-      IMGEXT=$(grep -A1 'playerAvatarAutoSizeInner' /tmp/"$STEAMID".html | tail -n1 | awk -F'"' '{print $2}' | awk -F. '{print $NF}')
+      IMGEXT=$(grep -A1 'playerAvatarAutoSizeInner' /opt/dizcord/playerdb/html/"$STEAMID".html | tail -n1 | awk -F'"' '{print $2}' | awk -F. '{print $NF}')
       # get the user image
-      wget -O /opt/dizcord/playerdb/images/"$STEAMID"."$IMGEXT" $(grep -A1 'playerAvatarAutoSizeInner' /tmp/"$STEAMID".html | tail -n1 | awk -F'"' '{print $2}')
+      wget -O /opt/dizcord/playerdb/images/"$STEAMID"."$IMGEXT" $(grep -A1 'playerAvatarAutoSizeInner' /opt/dizcord/playerdb/html/"$STEAMID".html | tail -n1 | awk -F'"' '{print $2}')
       # get image link
-      IMGNAME=$(grep -A1 'playerAvatarAutoSizeInner' /tmp/"$STEAMID".html | tail -n1 | awk -F'"' '{print $2}')
+      IMGNAME=$(grep -A1 'playerAvatarAutoSizeInner' /opt/dizcord/playerdb/html/"$STEAMID".html | tail -n1 | awk -F'"' '{print $2}')
     fi
     cp /opt/dizcord/playerdb/images/"$STEAMID"."$IMGEXT" /opt/dizcord/playerdb/images/"$STEAMNAME"."$IMGEXT"
   fi
 
   # get hours played
-  HRS=$(grep -B2 -E 'Project Zomboid' /tmp/"$STEAMID".html | grep -E 'on record' | grep -o -E '[0-9,]*')
+  HRS=$(grep -B2 -E 'Project Zomboid' /opt/dizcord/playerdb/html/"$STEAMID".html | grep -E 'on record' | grep -o -E '[0-9,]*')
   DATE=$(date +%Y-%m-%d\ %H:%M:%S)
 
   # Lets get other games from steam (NAME is game name LAST is last played, HRS is hours in that game)
-  OGAMENAME1=$(grep -E -A4 "\"game_capsule\""  /tmp/"$STEAMID".html | grep -v 108600 | grep -E "whiteLink" | head -n1 | xargs | sed 's/.*app\/[0-9]*>//'  | rev | cut -c12- | rev)
-  OGAMENAME2=$(grep -E -A4 "\"game_capsule\""  /tmp/"$STEAMID".html | grep -v 108600 | grep -E "whiteLink" | tail -n1 | xargs | sed 's/.*app\/[0-9]*>//'  | rev | cut -c12- | rev)
-  if [[ $(grep -E -A4 "\"game_capsule\""  /tmp/"$STEAMID".html | grep -v 108600 | sed 's/^\s*//' | tail -n10 | grep -o -E 'last.*'| head -n1 | rev | cut -c9- | rev | sed 's/ on/:/' | sed 's/.*/\u&/' | xargs | awk '{print $3 " " $4}') = $(date +%d" "%b) ]]; then
+  OGAMENAME1=$(grep -E -A4 "\"game_capsule\""  /opt/dizcord/playerdb/html/"$STEAMID".html | grep -v 108600 | grep -E "whiteLink" | head -n1 | xargs | sed 's/.*app\/[0-9]*>//'  | rev | cut -c12- | rev)
+  OGAMENAME2=$(grep -E -A4 "\"game_capsule\""  /opt/dizcord/playerdb/html/"$STEAMID".html | grep -v 108600 | grep -E "whiteLink" | tail -n1 | xargs | sed 's/.*app\/[0-9]*>//'  | rev | cut -c12- | rev)
+  if [[ $(grep -E -A4 "\"game_capsule\""  /opt/dizcord/playerdb/html/"$STEAMID".html | grep -v 108600 | sed 's/^\s*//' | tail -n10 | grep -o -E 'last.*'| head -n1 | rev | cut -c9- | rev | sed 's/ on/:/' | sed 's/.*/\u&/' | xargs | awk '{print $3 " " $4}') = $(date +%d" "%b) ]]; then
     OGAMELAST1="Last played: Today"
-  elif [[ $(grep -E -A4 "\"game_capsule\""  /tmp/"$STEAMID".html | grep -v 108600 | sed 's/^\s*//' | tail -n10 | grep -o -E 'last.*'| head -n1 | rev | cut -c9- | rev | sed 's/ on/:/' | sed 's/.*/\u&/' | xargs | awk '{print $3 " " $4}') = $(date -d "yesterday" +%d" "%b) ]]; then
+  elif [[ $(grep -E -A4 "\"game_capsule\""  /opt/dizcord/playerdb/html/"$STEAMID".html | grep -v 108600 | sed 's/^\s*//' | tail -n10 | grep -o -E 'last.*'| head -n1 | rev | cut -c9- | rev | sed 's/ on/:/' | sed 's/.*/\u&/' | xargs | awk '{print $3 " " $4}') = $(date -d "yesterday" +%d" "%b) ]]; then
     OGAMELAST1="Last played: Yesterday"
   else
-    OGAMELAST1=$(grep -E -A4 "\"game_capsule\""  /tmp/"$STEAMID".html | grep -v 108600 | sed 's/^\s*//' | tail -n10 | grep -o -E 'last.*'| head -n1 | rev | cut -c9- | rev | sed 's/ on/:/' | sed 's/.*/\u&/' | xargs)
+    OGAMELAST1=$(grep -E -A4 "\"game_capsule\""  /opt/dizcord/playerdb/html/"$STEAMID".html | grep -v 108600 | sed 's/^\s*//' | tail -n10 | grep -o -E 'last.*'| head -n1 | rev | cut -c9- | rev | sed 's/ on/:/' | sed 's/.*/\u&/' | xargs)
   fi
-  if [[ $(grep -E -A4 "\"game_capsule\""  /tmp/"$STEAMID".html | grep -v 108600 | sed 's/^\s*//' | tail -n10 | grep -o -E 'last.*'| tail -n1 | rev | cut -c9- | rev | sed 's/ on/:/' | sed 's/.*/\u&/' | xargs) = $(date +%d" "%b) ]]; then
+  if [[ $(grep -E -A4 "\"game_capsule\""  /opt/dizcord/playerdb/html/"$STEAMID".html | grep -v 108600 | sed 's/^\s*//' | tail -n10 | grep -o -E 'last.*'| tail -n1 | rev | cut -c9- | rev | sed 's/ on/:/' | sed 's/.*/\u&/' | xargs) = $(date +%d" "%b) ]]; then
     OGAMELAST2="Last played: Today"
-  elif [[ $(grep -E -A4 "\"game_capsule\""  /tmp/"$STEAMID".html | grep -v 108600 | sed 's/^\s*//' | tail -n10 | grep -o -E 'last.*'| tail -n1 | rev | cut -c9- | rev | sed 's/ on/:/' | sed 's/.*/\u&/' | xargs) = $(date -d "yesterday" +%d" "%b) ]]; then
+  elif [[ $(grep -E -A4 "\"game_capsule\""  /opt/dizcord/playerdb/html/"$STEAMID".html | grep -v 108600 | sed 's/^\s*//' | tail -n10 | grep -o -E 'last.*'| tail -n1 | rev | cut -c9- | rev | sed 's/ on/:/' | sed 's/.*/\u&/' | xargs) = $(date -d "yesterday" +%d" "%b) ]]; then
     OGAMELAST2="Last played: Yesterday"
   else
-    OGAMELAST2=$(grep -E -A4 "\"game_capsule\""  /tmp/"$STEAMID".html | grep -v 108600 | sed 's/^\s*//' | tail -n10 | grep -o -E 'last.*'| tail -n1 | rev | cut -c9- | rev | sed 's/ on/:/' | sed 's/.*/\u&/' | xargs)
+    OGAMELAST2=$(grep -E -A4 "\"game_capsule\""  /opt/dizcord/playerdb/html/"$STEAMID".html | grep -v 108600 | sed 's/^\s*//' | tail -n10 | grep -o -E 'last.*'| tail -n1 | rev | cut -c9- | rev | sed 's/ on/:/' | sed 's/.*/\u&/' | xargs)
   fi
-  OGAMEHRS1=$(grep -E -A4 "\"game_capsule\""  /tmp/"$STEAMID".html | grep -v 108600 | sed 's/^\s*//' | tail -n10 | grep -o -E '.*ord' | head -n1)
-  OGAMEHRS2=$(grep -E -A4 "\"game_capsule\""  /tmp/"$STEAMID".html | grep -v 108600 | sed 's/^\s*//' | tail -n10 | grep -o -E '.*ord' | tail -n1)
+  OGAMEHRS1=$(grep -E -A4 "\"game_capsule\""  /opt/dizcord/playerdb/html/"$STEAMID".html | grep -v 108600 | sed 's/^\s*//' | tail -n10 | grep -o -E '.*ord' | head -n1)
+  OGAMEHRS2=$(grep -E -A4 "\"game_capsule\""  /opt/dizcord/playerdb/html/"$STEAMID".html | grep -v 108600 | sed 's/^\s*//' | tail -n10 | grep -o -E '.*ord' | tail -n1)
 
   # lets keep a record of who joins the server
   touch /opt/dizcord/playerdb/users.log /opt/dizcord/playerdb/access.log /opt/dizcord/playerdb/denied.log
@@ -334,17 +337,20 @@ JOIN(){
     if [[ -z "$OGAMENAME1" ]]; then
       if [[ -z $HRS ]]; then
         curl -H "Content-Type: application/json" -X POST -d \
-        "{\"embeds\": [{ \"color\": \"$PURPLE\", \"title\": \"New connection:\",  \"description\": \"Steam Profile: [$STEAMNAME]($STEAMLINK)\nLogging in as **$LOGINNAME**\", \
+        "{\"embeds\": [{ \"color\": \"$PURPLE\", \"title\": \"New connection:\",  \"description\": \
+        \"Steam Profile: [$STEAMNAME]($STEAMLINK)\nLogging in as **$LOGINNAME**\n From IP: $CONNIP" with ping: $MS\",  \
         \"thumbnail\": { \"url\": \"$IMGNAME\"} }] }" $URL
       else
         curl -H "Content-Type: application/json" -X POST -d \
-        "{\"embeds\": [{ \"color\": \"$PURPLE\", \"title\": \"New connection:\",  \"description\": \"Steam Profile: [$STEAMNAME]($STEAMLINK)\nLogging in as **$LOGINNAME**\", \
+        "{\"embeds\": [{ \"color\": \"$PURPLE\", \"title\": \"New connection:\",  \"description\": \
+        \"Steam Profile: [$STEAMNAME]($STEAMLINK)\nLogging in as **$LOGINNAME**\n From IP: $CONNIP" with ping: $MS\",  \
         \"fields\": [ { \"name\": \"Hours on Record:\", \"value\": \"$HRS\", \"inline\": false }, \
         \"thumbnail\": { \"url\": \"$IMGNAME\"} }] }" $URL
       fi
     else
       curl -H "Content-Type: application/json" -X POST -d \
-      "{\"embeds\": [{ \"color\": \"$PURPLE\", \"title\": \"New connection:\",  \"description\": \"Steam Profile: [$STEAMNAME]($STEAMLINK)\nLogging in as **$LOGINNAME**\", \
+      "{\"embeds\": [{ \"color\": \"$PURPLE\", \"title\": \"New connection:\",  \"description\": \
+      \"Steam Profile: [$STEAMNAME]($STEAMLINK)\nLogging in as **$LOGINNAME**\n From IP: $CONNIP" with ping: $MS\",  \
       \"fields\": [ { \"name\": \"Hours on Record:\", \"value\": \"$HRS\", \"inline\": false }, \
       { \"name\": \"\u200b\", \"value\": \"\u200b\", \"inline\": false }, \
       { \"name\": \"$STEAMNAME has also played:\", \"value\": \"\", \"inline\": false }, \
@@ -353,7 +359,8 @@ JOIN(){
     fi
   else
     curl -H "Content-Type: application/json" -X POST -d \
-    "{\"embeds\": [{ \"color\": \"$PURPLE\",  \"title\": \"New connection:\",  \"description\": \"Steam Profile: [$STEAMNAME]($STEAMLINK)\nLogging in as **$LOGINNAME**\",  \
+    "{\"embeds\": [{ \"color\": \"$PURPLE\",  \"title\": \"New connection:\",  \"description\": \
+    \"Steam Profile: [$STEAMNAME]($STEAMLINK)\nLogging in as **$LOGINNAME**\n From IP: $CONNIP" with ping: $MS\",  \
     \"fields\": [ { \"name\": \"Hours on Record:\", \"value\": \"$HRS\", \"inline\": false }, \
     { \"name\": \"\u200b\", \"value\": \"\u200b\", \"inline\": false }, \
     { \"name\": \"$STEAMNAME has also played:\", \"value\": \"\", \"inline\": false }, \
