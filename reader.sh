@@ -338,19 +338,19 @@ JOIN(){
       if [[ -z $HRS ]]; then
         curl -H "Content-Type: application/json" -X POST -d \
         "{\"embeds\": [{ \"color\": \"$PURPLE\", \"title\": \"New connection:\",  \"description\": \
-        \"Steam Profile: [$STEAMNAME]($STEAMLINK)\nLogging in as **$LOGINNAME**\n From IP: $CONNIP" with ping: $MS\",  \
+        \"Steam Profile: [$STEAMNAME]($STEAMLINK)\nLogging in as **$LOGINNAME**\n From IP: $CONNIP with ping: $MS\",  \
         \"thumbnail\": { \"url\": \"$IMGNAME\"} }] }" $URL
       else
         curl -H "Content-Type: application/json" -X POST -d \
         "{\"embeds\": [{ \"color\": \"$PURPLE\", \"title\": \"New connection:\",  \"description\": \
-        \"Steam Profile: [$STEAMNAME]($STEAMLINK)\nLogging in as **$LOGINNAME**\n From IP: $CONNIP" with ping: $MS\",  \
+        \"Steam Profile: [$STEAMNAME]($STEAMLINK)\nLogging in as **$LOGINNAME**\n From IP: $CONNIP with ping: $MS\",  \
         \"fields\": [ { \"name\": \"Hours on Record:\", \"value\": \"$HRS\", \"inline\": false }, \
         \"thumbnail\": { \"url\": \"$IMGNAME\"} }] }" $URL
       fi
     else
       curl -H "Content-Type: application/json" -X POST -d \
       "{\"embeds\": [{ \"color\": \"$PURPLE\", \"title\": \"New connection:\",  \"description\": \
-      \"Steam Profile: [$STEAMNAME]($STEAMLINK)\nLogging in as **$LOGINNAME**\n From IP: $CONNIP" with ping: $MS\",  \
+      \"Steam Profile: [$STEAMNAME]($STEAMLINK)\nLogging in as **$LOGINNAME**\n From IP: $CONNIP with ping: $MS\",  \
       \"fields\": [ { \"name\": \"Hours on Record:\", \"value\": \"$HRS\", \"inline\": false }, \
       { \"name\": \"\u200b\", \"value\": \"\u200b\", \"inline\": false }, \
       { \"name\": \"$STEAMNAME has also played:\", \"value\": \"\", \"inline\": false }, \
@@ -360,7 +360,7 @@ JOIN(){
   else
     curl -H "Content-Type: application/json" -X POST -d \
     "{\"embeds\": [{ \"color\": \"$PURPLE\",  \"title\": \"New connection:\",  \"description\": \
-    \"Steam Profile: [$STEAMNAME]($STEAMLINK)\nLogging in as **$LOGINNAME**\n From IP: $CONNIP" with ping: $MS\",  \
+    \"Steam Profile: [$STEAMNAME]($STEAMLINK)\nLogging in as **$LOGINNAME**\n From IP: $CONNIP with ping: $MS\",  \
     \"fields\": [ { \"name\": \"Hours on Record:\", \"value\": \"$HRS\", \"inline\": false }, \
     { \"name\": \"\u200b\", \"value\": \"\u200b\", \"inline\": false }, \
     { \"name\": \"$STEAMNAME has also played:\", \"value\": \"\", \"inline\": false }, \
