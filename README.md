@@ -192,6 +192,7 @@ Now join your Project Zomboid server and watch discord for all the glory.
 
 _Known bugs / To Do:_
 
+- [ ] Work on `SETTINGSCHECK` in wizard.sh
 - [ ] get diZcord in Steam Workshop?
 - [ ] Wizard: add option to support multiple Zomboid servers
 - [ ] Detect previous installation
