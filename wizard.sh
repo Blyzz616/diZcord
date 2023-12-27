@@ -232,25 +232,48 @@ SETTINGSCHECK(){
   # Does settings file exist, and if it does, ask if the user wants to create a new server or change existing settings
   SETNUM=$(find /opt/dizcord/ -type f -name "settings-*" | wc -l)
   if [[ $SETNUM -eq 1 ]]; then
-    SETFILE=""
+    ######
+    ## if there's one existing settings file
+    ######
+    SETFILE="" #create variable
     SETFILE=$(cat $(find /opt/dizcord/ -type f -name "settings-*") | jq -r '.server'
-    if whiptail --title "Existing Install found" --yesno --yes-button "Update" --no-button "New Instance" \
-    "The settings for $SETFILE were found. Would you like to update them or create a new instance?" 26 80; then
-      #code to change existing file
+    whiptail --title "Existing Install found" --yesno --yes-button "Update" --no-button "New Instance" "The settings for $SETFILE were found. Would you like to update them or create a new instance?" 26 80
+    if [[ $? = 1 ]]; then
+      ######
+      # code to change existing file
+      # change - we could bring up all the settings into a menu and ask which one to change
+      ######
     else
-      #code to create new instance
+      # code to create new instance
+    fi
   elif [[ $SETNUM -gt 1 ]]; then
-    SETFILE=()
-    SETFILE=$(cat $(find /opt/dizcord/ -type f -name "settings-*") | jq -r '.server')
-    if whiptail --title "Existing Install found" --yesno --yes-button "Update" --no-button "New Instance" \
-    "The settings for $SETNUM diZcord instances were found. Would you like to update one of them or create a new one?" 26 80; then
-      if [[ $SETNUM -eq 2 ]]; then
-        if whiptail --title "Existing Install found" --yesno --yes-button "Update" --no-button "New Instance" \
-      else
-        UPDATEINST=$(whiptail --title "Select Settigns" --menu "Please select which instance you wish to edit:" 15 80 5 "0" "No automatic restart" "1" "Once a day" "2" "Every 12 hours" "3" "Every 8 hours" "4" "Every 6 hours" 3>&1 1>&2 2>&3)
+    ######
+    ## if there are more than one existing settings files
+    ######
+    SETFILE=() #create array
+    while IFS= read -r line; do
+      SETFILE+=("$line")
+    done < <(find /opt/dizcord/ -type f -name "settings-*" -exec cat {} \; | jq -r '.server')
+    MENU_ITEMS=()
+    for ((i=0; i<${#SETFILE[@]}; i++)); do
+      MENU_ITEMS+=("$((i+1))" "${SETFILE[i]}")
+    done
+    SELECTEDINI=$(whiptail --menu "Select option" 15 60 6 "${MENU_ITEMS[@]}" 3>&1 1>&2 2>&3)
+    if [ $? -eq 0 ]; then
+      #this will select the $SETFILE to the one that was selected.
+      ${SETFILE[$((SELECTEDINI-1))]}
+      ######
+      #Now we need to grab all the settings from the file and allow the usert to 1: change 2: delete or 3: create new
+      # change - we could bring up all the settings into a menu and ask which one to change
+      # delete - big red confirmation
+      # create new - continue as per normal
+      ######
+    else
+      exit
+    fi
   else
-   echo "none"
-   fi
+    # no settigns exist - continue as normal
+  fi
  }
 
  LICENSE(){
