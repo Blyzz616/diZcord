@@ -423,6 +423,18 @@ DISCORDHOOK(){
   done
 }
 
+DISCORDBOT(){
+  # Ask the user to enter the bot token
+  TOKEN=""
+  while true; do
+    TOKEN=$(whiptail --title "Discord Webhook" --inputbox "Please enter the full toekn for your bot." 12 80 "" 3>&1 1>&2 2>&3)
+
+    # Check if the user pressed Cancel
+    if [ $? -ne 0 ]; then
+      exit 1
+    fi
+}
+
 CRONTAB(){
   # Do we want the Project Zomboid server to start automatically when the server boots up?
   whiptail --title "Start on reboot" --yesno "Do you want the Project Zomboid server to start automatically when the server boots up?" 10 80
@@ -563,6 +575,7 @@ SAVE(){
   \"INI\": \"$STARTINI\",
   \"server\": \"$SERVER_NAME\",
   \"url\": \"$WEBHOOK\",
+  \"token\": \"$TOKEN\",
   \"startonboot\": \"$RESTARTONREBOOT\",
   \"daily\": \"$SCHEDULE\",
   \"dailyH\": \"$SCHEDULEHRS\",
@@ -595,6 +608,7 @@ LICENSE
 FINDINI
 HUMANNAME
 DISCORDHOOK
+DISCORDBOT
 CRONTAB
 DOWNLOAD
 INSTRUCTIONS
