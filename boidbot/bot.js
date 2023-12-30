@@ -1,13 +1,12 @@
-const { Client, Intents } = require('discord.js');
+const { Client, GatewayIntentBits } = require('discord.js');
 const { spawn } = require('child_process');
 
 const client = new Client({
   intents: [
-    Intents.FLAGS.GUILDS,
-    Intents.FLAGS.GUILD_MESSAGES,
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
   ],
-});
-
+  
 const prefix = '!';
 const targetChannelId = '<INSERT-YOUR-OWN-CHANNEL-ID-HERE>'; // Replace with the actual channel ID
 
@@ -66,4 +65,4 @@ function executeCommand(command, message) {
   });
 }
 
-client.login('<INSERT-YOUR-OWN-DISCORD-BOT-TOKEN-HERE>');
+client.login('BOTTOKEN');
