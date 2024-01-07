@@ -394,7 +394,7 @@ JOIN(){
 DISCON(){
   STEAMID=$(echo "$DISCONN" | grep -E -o 'steam-id=[0-9]*' | awk -F= '{print $2}')
   STEAMNAME=$(grep "$STEAMID" /opt/dizcord/playerdb/users.log | awk -F"\t" '{print $3}')
-  STEAMLINK=$("https://steamcommunity.com/profiles/$STEAMID")
+  STEAMLINK="https://steamcommunity.com/profiles/$STEAMID"
 
   # If the player was online - write play times
   if [[ -e /opt/dizcord/times/"$STEAMID".online ]]; then
