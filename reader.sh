@@ -586,8 +586,7 @@ READER(){
     EHE_FLY_OVER=$(echo "$LINE" | grep -E "FLEW OVER TARGET \(.*" | awk -F"(" '{print $NF}' | rev | cut -c3- | rev) # Flying over player
     EHE_GO_HOME=$(echo "$LINE" | grep -E "UN-LAUNCH") # End of event
     CONN_AUTH_DENIED=$(echo "$LINE" | grep -E -o 'Client sent invalid server password')
-    EHE_CLASS=$(echo "$LINE" | grep -o '---.*target' | awk -F"(" '{print $2}' | awk -F")" '{print $1}')
-    #EHE_CLASS=$(echo "$LINE" | grep -E -o "---.*target" | awk -F"(" '{print $2}' | awk -F")" '{print $1}')
+    EHE_CLASS=$(echo "$LINE" | grep -E -o "[-][-][-].*target" | awk -F"(" '{print $2}' | awk -F")" '{print $1}')
 
     # Put all the variables in an array
     CHOPPER_VARS=("CHOP_ACTIVE" "CHOP_ARRIVE" "CHOP_SEARCH" "CHOP_LEAVE" "EHE_LAUNCH" "EHE_TARGET" "EHE_CRASH" "EHE_CRASH_LOG" "EHE_ROAMING" "EHE_FLY_OVER" "EHE_CLASS")
