@@ -335,7 +335,7 @@ JOIN(){
   # lets keep a record of who joins the server
   touch /opt/dizcord/playerdb/users.log /opt/dizcord/playerdb/access.log /opt/dizcord/playerdb/denied.log
   
-  if [[ $(wc -l /opt/dizcord/playerdb/users.log) -eq 0 ]]; then
+  if [[ $(wc -l < /opt/dizcord/playerdb/users.log) -eq 0 ]]; then
     echo -e 'FIRST SEEN\tSTEAMID\tSTEAM-NAME\tIP ADDRESS\tlogin\tIMAGE NAME\tIMAGE LINK' > /opt/dizcord/playerdb/users.log
   fi  
   
