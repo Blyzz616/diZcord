@@ -226,6 +226,7 @@ VALIDATE_WEBHOOK() {
 WELCOME(){
   # Welcome screen
   whiptail --title "Project Zomboid Server Integration" --msgbox "Welcome to the installation wizard.\n\nThis tool will help you integrate your Project Zomboid Server with your Discord server.\n\nYou should already have your Project Zomboid Server set up and running." 16 80
+  
 }
 
 SETTINGSCHECK(){
@@ -274,7 +275,8 @@ SETTINGSCHECK(){
   else
     # no settigns exist - continue as normal
   fi
- }
+  
+}
 
  LICENSE(){
   # License
