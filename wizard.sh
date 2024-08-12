@@ -229,7 +229,7 @@ WELCOME(){
   
 }
 
-SETTINGSCHECK() {
+SETTINGSCHECK(){
   # Does settings file exist, and if it does, ask if the user wants to create a new server or change existing settings
   SETNUM=$(find /opt/dizcord/ -type f -name "settings-*" | wc -l)
   if [[ $SETNUM -eq 1 ]]; then
@@ -275,10 +275,9 @@ SETTINGSCHECK() {
   else
     # no settigns exist - continue as normal
   fi
-  
 }
 
- LICENSE(){
+LICENSE(){
   # License
   LICENSE_TEXT="
   GNU General Public License v3.0\n\
