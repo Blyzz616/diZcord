@@ -1,6 +1,22 @@
 # diZcord
 Project Zomboid / Discord integration
 
+***
+
+# Update - 26 Sept 2024 
+
+I'm probably going to be starting this from scratch when Build 42 is released.
+
+## Notes
+
+- I'll be using some of the code from this repo, but I'll be creating a copmletely new repo so this one will be deprecated.
+- I'll be integrating it with Steam Workshop to ensure that you're subscribed to the workshop item.
+- Going to ***try*** doing it in Python to get it working in Both Windows and Linux - no promises.
+- My personal time is *severly* limmited right now, so it's going to take a long time - if anyone out there wants to help me - I'm open to the idea.
+- I'm not going to take this down, but I'm not going to be updating this one anymore.
+
+***
+
 ![What the discord integration looks like](https://i.imgur.com/Xa4TcU1.jpeg)
 
 ![When a player joins](https://github.com/Blyzz616/diZcord/assets/19424317/3995e12d-710d-4890-ba2a-09fb460e2230)
