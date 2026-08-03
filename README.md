@@ -7,6 +7,17 @@ Project Zomboid / Discord integration
 
 I'm probably going to be starting this from scratch when Build 42 is released.
 
+# Update - 03 Aug 2026
+
+New REPO!
+
+[https://github.com/Blyzz616/diZcord-b42] (https://github.com/Blyzz616/diZcord-b42)
+
+Better integration - refactord to Python
+Need to verify whether this works on a Win server.
+
+and that's it - that was the last update to this repo.
+
 ## Notes
 
 - I'll be using some of the code from this repo, but I'll be creating a copmletely new repo so this one will be deprecated.
