@@ -9,9 +9,9 @@ I'm probably going to be starting this from scratch when Build 42 is released.
 
 # Update - 03 Aug 2026
 
-New REPO!
+New REPO! (works in b42)
 
-[https://github.com/Blyzz616/diZcord-b42] (https://github.com/Blyzz616/diZcord-b42)
+https://github.com/Blyzz616/diZcord-b42
 
 Better integration - refactord to Python
 Need to verify whether this works on a Win server.
